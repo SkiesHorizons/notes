@@ -11,11 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+.tanstack
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+.vscode/
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
 .env
 .env.local

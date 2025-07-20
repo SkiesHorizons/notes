@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="notes-api@localhost" uuid="ec4de83f-0311-4cb5-871f-12523878b2ea">
+    <data-source source="LOCAL" name="postgres@localhost" uuid="46578d85-ed79-4e9f-a185-f9b36ae993bb">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/notes-api</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:54322/postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

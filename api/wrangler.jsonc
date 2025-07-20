@@ -1,9 +1,0 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "todo-api",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "compatibility_date": "2025-05-05",
-  "main": "./src/index.ts"
-}
