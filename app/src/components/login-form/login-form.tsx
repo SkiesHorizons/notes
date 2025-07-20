@@ -4,9 +4,11 @@ import classes from "./login-form.module.css"
 import { Link } from "@tanstack/react-router"
 import { zod4Resolver } from "mantine-form-zod-resolver"
 import { z } from "zod"
-import { zLoginCredentials } from "@/lib/api"
 
-const zLoginForm = zLoginCredentials
+const zLoginForm = z.object({
+  email: z.email(),
+  password: z.string(),
+})
 
 export type LoginFormValues = z.infer<typeof zLoginForm>
 
@@ -18,7 +20,7 @@ export interface LoginFormProps {
 export function LoginForm({ loading, onSubmit }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     initialValues: {
-      username: "",
+      email: "",
       password: "",
     },
     validate: zod4Resolver(zLoginForm),
@@ -40,13 +42,14 @@ export function LoginForm({ loading, onSubmit }: LoginFormProps) {
       <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
         <form onSubmit={form.onSubmit(onSubmit)}>
           <TextInput
-            key={form.key("username")}
-            label="Username"
-            placeholder="your_username"
+            key={form.key("email")}
+            label="Email"
+            placeholder="your_email@example.com"
             required
             radius="md"
             disabled={loading}
-            {...form.getInputProps("username")}
+            type="email"
+            {...form.getInputProps("email")}
           />
           <PasswordInput
             key={form.key("password")}

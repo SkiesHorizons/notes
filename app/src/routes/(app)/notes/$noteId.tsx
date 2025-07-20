@@ -2,18 +2,31 @@ import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
 import { createFileRoute } from "@tanstack/react-router"
-import type { Note } from "@/lib/api"
-import { getNoteByIdQueryKey, getNoteByIdQueryOptions, listNotesQueryKey } from "@/lib/api"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { usePatchNoteMutation } from "@/hooks/api"
 import { notifications } from "@mantine/notifications"
 import { type NoteData, NoteEditor } from "@/components/note-editor"
 import { savingStore } from "@/lib/stores.ts"
+import { getCurrentUser, supabase } from "@/lib/supabase"
+import type { Note } from "@/lib/types"
 
 const noteQueryOptions = (noteId: string) =>
-  getNoteByIdQueryOptions({
-    path: {
-      noteId: noteId,
+  queryOptions({
+    queryKey: ["notes", noteId],
+    queryFn: async () => {
+      const user = await getCurrentUser()
+      const { data, error } = await supabase.from("notes").select().eq("id", noteId).eq("user_id", user.id).single()
+      if (error) {
+        throw error
+      }
+      return {
+        id: data.id,
+        userId: data.user_id,
+        title: data.title,
+        content: data.content,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      } as Note
     },
   })
 
@@ -33,15 +46,8 @@ function RouteComponent() {
       savingStore.setState(() => true)
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(
-        getNoteByIdQueryKey({
-          path: {
-            noteId: data.id,
-          },
-        }),
-        data,
-      )
-      queryClient.setQueryData(listNotesQueryKey(), (old: Note[]) => {
+      queryClient.setQueryData(["notes", noteId], data)
+      queryClient.setQueryData(["notes"], (old: Note[]) => {
         return old.map((n) => (n.id === data.id ? data : n))
       })
       savingStore.setState(() => false)
@@ -67,10 +73,8 @@ function RouteComponent() {
       return
     }
     patchNoteMutation.mutate({
-      path: {
-        noteId: noteId,
-      },
-      body: patch,
+      noteId: noteId,
+      data: patch,
     })
   }
 

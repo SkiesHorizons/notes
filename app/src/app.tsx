@@ -8,11 +8,7 @@ import { Notifications } from "@mantine/notifications"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { routeTree } from "./routeTree.gen"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
-import createStore from "react-auth-kit/createStore"
-import AuthProvider from "react-auth-kit"
-import type { User } from "@/lib/types"
-import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated"
-import { client } from "@/lib/api"
+import { supabase } from "@/lib/supabase"
 
 // Create a client
 const queryClient = new QueryClient()
@@ -38,24 +34,16 @@ declare module "@tanstack/react-router" {
   }
 }
 
-const authStore = createStore<User>({
-  authType: "localstorage",
-  authName: "notes_auth",
-})
-
-client.setConfig({
-  auth: () => authStore.tokenObject.value.auth?.token,
-})
-
 function InnerApp() {
-  const isAuthenticated = useIsAuthenticated()
-
   return (
     <RouterProvider
       router={router}
       context={{
         auth: {
-          isAuthenticated: () => isAuthenticated,
+          isAuthenticated: async () => {
+            const { data } = await supabase.auth.getSession()
+            return data.session !== null
+          },
         },
       }}
     />
@@ -68,9 +56,7 @@ export function App() {
       <MantineProvider>
         <Notifications />
         <ModalsProvider>
-          <AuthProvider store={authStore}>
-            <InnerApp />
-          </AuthProvider>
+          <InnerApp />
         </ModalsProvider>
       </MantineProvider>
     </QueryClientProvider>

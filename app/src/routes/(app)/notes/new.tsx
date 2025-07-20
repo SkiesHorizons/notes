@@ -3,9 +3,9 @@ import { useCreateNoteMutation } from "@/hooks/api"
 import type { PartialBlock } from "@blocknote/core"
 import { notifications } from "@mantine/notifications"
 import { useQueryClient } from "@tanstack/react-query"
-import { listNotesQueryKey } from "@/lib/api"
 import { savingStore } from "@/lib/stores.ts"
 import { type NoteData, NoteEditor } from "@/components/note-editor"
+import type { Note } from "@/lib/types"
 
 export const Route = createFileRoute("/(app)/notes/new")({
   component: RouteComponent,
@@ -25,9 +25,7 @@ function RouteComponent() {
     },
 
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({
-        queryKey: listNotesQueryKey(),
-      })
+      await queryClient.setQueryData(["notes"], (old: Note[]) => [data, ...old])
       await navigate({
         to: "/notes/$noteId",
         params: { noteId: data.id },
@@ -48,10 +46,8 @@ function RouteComponent() {
 
   const handleSave = (data: NoteData) => {
     createNoteMutation.mutate({
-      body: {
-        title: data.title,
-        content: data.content || JSON.stringify([BLANK_BLOCK]),
-      },
+      title: data.title,
+      content: data.content || JSON.stringify([BLANK_BLOCK]),
     })
   }
 

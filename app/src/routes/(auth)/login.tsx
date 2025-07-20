@@ -1,10 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router"
 import { z } from "zod"
 import { LoginForm, type LoginFormValues } from "@/components/login-form"
 import { useLoginMutation } from "@/hooks/api"
-import useSignIn from "react-auth-kit/hooks/useSignIn"
 import { notifications } from "@mantine/notifications"
-import { getCurrentUser } from "@/lib/api"
 
 export const authenticatedFallback = "/" as const
 
@@ -12,8 +10,8 @@ export const Route = createFileRoute("/(auth)/login")({
   validateSearch: z.object({
     redirect: z.string().optional().catch(""),
   }),
-  beforeLoad: ({ context, search }) => {
-    if (context.auth.isAuthenticated()) {
+  beforeLoad: async ({ context, search }) => {
+    if (await context.auth.isAuthenticated()) {
       throw redirect({ to: search.redirect || authenticatedFallback })
     }
   },
@@ -21,18 +19,32 @@ export const Route = createFileRoute("/(auth)/login")({
 })
 
 function RouteComponent() {
-  const signIn = useSignIn()
+  const router = useRouter()
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
   const loginMutation = useLoginMutation({
-    onSuccess: async ({ accessToken }) => {
-      const { data: user } = await getCurrentUser()
-      signIn({
-        auth: {
-          token: accessToken,
-        },
-        userState: user,
+    onSuccess: async (res) => {
+      if (res.error) {
+        notifications.show({
+          color: "red",
+          title: "Login failed",
+          message: res.error.message || "An error occurred during login.",
+          autoClose: 5000,
+        })
+        return
+      }
+
+      notifications.show({
+        color: "green",
+        title: "Login successful",
+        message: "You have been logged in successfully.",
+        autoClose: 3000,
       })
+
+      await router.invalidate()
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       await navigate({ to: search.redirect || authenticatedFallback, replace: true })
     },
     onError: (err) => {
@@ -47,10 +59,8 @@ function RouteComponent() {
 
   const handleLogin = (values: LoginFormValues) => {
     loginMutation.mutate({
-      body: {
-        username: values.username,
-        password: values.password,
-      },
+      email: values.email,
+      password: values.password,
     })
   }
 

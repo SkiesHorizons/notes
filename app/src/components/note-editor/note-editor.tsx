@@ -1,7 +1,6 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
-import { type Note } from "@/lib/api"
 import { getHotkeyHandler, type HotkeyItem, useDebouncedCallback, useHotkeys } from "@mantine/hooks"
 import { useEffect, useRef, useState } from "react"
 import { useCreateBlockNote } from "@blocknote/react"
@@ -10,6 +9,7 @@ import { BlockNoteView } from "@blocknote/mantine"
 import { Box, Flex, TextInput } from "@mantine/core"
 import type { Block } from "@blocknote/core"
 import classes from "./note-editor.module.css"
+import type { Note } from "@/lib/types"
 
 export type NoteData = {
   title?: string

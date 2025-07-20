@@ -5,8 +5,8 @@ import { notifications } from "@mantine/notifications"
 import { authenticatedFallback } from "@/routes/(auth)/login"
 
 export const Route = createFileRoute("/(auth)/register")({
-  beforeLoad: ({ context }) => {
-    if (context.auth.isAuthenticated()) {
+  beforeLoad: async ({ context }) => {
+    if (await context.auth.isAuthenticated()) {
       throw redirect({
         to: authenticatedFallback,
       })
@@ -40,7 +40,8 @@ function RouteComponent() {
 
   const handleRegister = (values: RegisterFormValues) => {
     registerMutation.mutate({
-      body: values,
+      email: values.email,
+      password: values.password,
     })
   }
 

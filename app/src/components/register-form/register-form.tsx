@@ -4,9 +4,12 @@ import classes from "./register-form.module.css"
 import { Link } from "@tanstack/react-router"
 import { zod4Resolver } from "mantine-form-zod-resolver"
 import { z } from "zod"
-import { zUserRegistration } from "@/lib/api"
 
-const zRegisterForm = zUserRegistration
+const zRegisterForm = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+    email: z.email(),
+  })
   .extend({
     repeatPassword: z.string(),
     acceptTerms: z.boolean(),
@@ -28,7 +31,6 @@ export interface RegisterFormProps {
 export function RegisterForm({ loading, onSubmit }: RegisterFormProps) {
   const form = useForm<RegisterFormValues>({
     initialValues: {
-      username: "",
       password: "",
       repeatPassword: "",
       email: "",
@@ -52,7 +54,7 @@ export function RegisterForm({ loading, onSubmit }: RegisterFormProps) {
 
       <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
         <form onSubmit={form.onSubmit(onSubmit)}>
-          <TextInput
+          {/*<TextInput
             key={form.key("username")}
             label="Username"
             placeholder="your_username"
@@ -60,7 +62,7 @@ export function RegisterForm({ loading, onSubmit }: RegisterFormProps) {
             radius="md"
             disabled={loading}
             {...form.getInputProps("username")}
-          />
+          />*/}
           {/*<TextInput
             key={form.key("name")}
             label="Name"
@@ -79,6 +81,7 @@ export function RegisterForm({ loading, onSubmit }: RegisterFormProps) {
             radius="md"
             mt="md"
             disabled={loading}
+            type="email"
             {...form.getInputProps("email")}
           />
           <PasswordInput

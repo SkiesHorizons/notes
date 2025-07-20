@@ -5,7 +5,7 @@ import type { QueryClient } from "@tanstack/react-query"
 interface RootRouterContext {
   queryClient: QueryClient
   auth: {
-    isAuthenticated: () => boolean
+    isAuthenticated: () => Promise<boolean>
   }
 }
 

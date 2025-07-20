@@ -1,19 +1,21 @@
 import { type DefaultError, useMutation, type UseMutationOptions } from "@tanstack/react-query"
-import type { LoginData, LoginResponse, Options, RegisterData, RegisterResponse } from "@/lib/api"
-import { loginMutationOptions, registerMutationOptions } from "@/lib/api"
+import type { AuthResponse, SignInWithPasswordCredentials, SignUpWithPasswordCredentials } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase"
 
-export function useLoginMutation(options?: UseMutationOptions<LoginResponse, DefaultError, Options<LoginData>>) {
+export function useLoginMutation(
+  options?: UseMutationOptions<AuthResponse, DefaultError, SignInWithPasswordCredentials>,
+) {
   return useMutation({
-    ...loginMutationOptions(),
+    mutationFn: (data) => supabase.auth.signInWithPassword(data),
     ...options,
   })
 }
 
 export function useRegisterMutation(
-  options?: UseMutationOptions<RegisterResponse, DefaultError, Options<RegisterData>>,
+  options?: UseMutationOptions<AuthResponse | null, DefaultError, SignUpWithPasswordCredentials>,
 ) {
   return useMutation({
-    ...registerMutationOptions(),
+    mutationFn: (data) => supabase.auth.signUp(data),
     ...options,
   })
 }

@@ -5,7 +5,7 @@ import { IconPlus } from "@tabler/icons-react"
 import { NoteBrowser } from "@/components/app-layout/note-browser"
 import { Link } from "@tanstack/react-router"
 import { useStore } from "@tanstack/react-store"
-import { savingStore } from "@/lib/stores.ts"
+import { savingStore } from "@/lib/stores"
 
 interface AppLayoutProps {
   children: ReactNode
