@@ -1,0 +1,9 @@
+.titleWrapper {
+    --input-height: 4.5rem !important;
+}
+
+.titleInput {
+    font-size: 3em; /* 48px - BlockNote H1 */
+    font-weight: var(--mantine-h1-font-weight);
+    color: var(--mantine-color-gray-8);
+}

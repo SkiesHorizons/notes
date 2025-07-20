@@ -1,0 +1,8 @@
+singleQuote: false
+semi: false
+printWidth: 120
+bracketSameLine: false
+jsxSingleQuote: false
+trailingComma: all
+tabWidth: 2
+useTabs: false
