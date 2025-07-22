@@ -1,0 +1,27 @@
+.listCard {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.gridCard {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 200px;
+}
+
+.listCard:hover,
+.gridCard:hover {
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}

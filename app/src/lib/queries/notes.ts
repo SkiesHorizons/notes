@@ -13,8 +13,9 @@ export const listNotesQueryOptions = () =>
       const { data, error } = await supabase
         .from("notes")
         .select("*")
-        .eq("userId", user.id)
-        .order("updatedAt", { ascending: false })
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .order("updated_at", { ascending: false })
 
       if (error) {
         throw error
@@ -50,7 +51,7 @@ export const patchNoteMutationOptions = () =>
         .from("notes")
         .update(noteMapper.toDbUpdate(data))
         .eq("id", noteId)
-        .eq("userId", user.id)
+        .eq("user_id", user.id)
         .select()
         .single()
 
@@ -59,5 +60,21 @@ export const patchNoteMutationOptions = () =>
       }
 
       return noteMapper.toModel(updated)
+    },
+  })
+
+export const deleteNoteMutationOptions = () =>
+  mutationOptions<void, DefaultError, { noteId: string }>({
+    mutationFn: async ({ noteId }) => {
+      const user = await getCurrentUser()
+      const { error } = await supabase
+        .from("notes")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", noteId)
+        .eq("user_id", user.id)
+
+      if (error) {
+        throw error
+      }
     },
   })

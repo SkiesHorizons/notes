@@ -1,19 +1,33 @@
-import { AppShell, Burger, Button, Group, Image, Loader, ScrollArea } from "@mantine/core"
-import type { ReactNode } from "react"
-import { useDisclosure } from "@mantine/hooks"
-import { IconPlus } from "@tabler/icons-react"
+import { AppHeader } from "@/components/app-header"
 import { NoteBrowser } from "@/components/app-layout/note-browser"
-import { Link } from "@tanstack/react-router"
-import { useStore } from "@tanstack/react-store"
-import { savingStore } from "@/lib/stores"
+import { AppShell, Button, ScrollArea } from "@mantine/core"
+import { useDisclosure, useMediaQuery } from "@mantine/hooks"
+import { IconPlus } from "@tabler/icons-react"
+import type { ReactNode } from "react"
+import { useEffect } from "react"
 
 interface AppLayoutProps {
   children: ReactNode
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [opened, { toggle }] = useDisclosure()
-  const saving = useStore(savingStore)
+  const [opened, { toggle, close }] = useDisclosure()
+  const isMobile = useMediaQuery("(max-width: 768px)")
+
+  // Close sidebar on mobile when route changes
+  useEffect(() => {
+    if (isMobile) {
+      close()
+    }
+  }, [isMobile, close])
+
+  const handleCreateNote = () => {
+    // Dispatch custom event to trigger note creation from main component
+    window.dispatchEvent(new CustomEvent("create-note"))
+    if (isMobile) {
+      close()
+    }
+  }
 
   return (
     <AppShell
@@ -22,17 +36,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Image src="/tauri.svg" h={30} w={30} />
-          </Group>
-          <Group>{saving && <Loader size="sm" />}</Group>
-        </Group>
+        <AppHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
       <AppShell.Navbar p="md">
         <AppShell.Section>
-          <Button component={Link} to={"/notes/new"} fullWidth variant="outline" leftSection={<IconPlus size={16} />}>
+          <Button onClick={handleCreateNote} fullWidth variant="outline" leftSection={<IconPlus size={16} />}>
             Create new note
           </Button>
         </AppShell.Section>
