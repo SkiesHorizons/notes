@@ -13,8 +13,6 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
-import { Route as appNotesNewRouteImport } from './routes/(app)/notes/new'
-import { Route as appNotesNoteIdRouteImport } from './routes/(app)/notes/$noteId'
 
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
@@ -35,30 +33,16 @@ const authLoginRoute = authLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appNotesNewRoute = appNotesNewRouteImport.update({
-  id: '/notes/new',
-  path: '/notes/new',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appNotesNoteIdRoute = appNotesNoteIdRouteImport.update({
-  id: '/notes/$noteId',
-  path: '/notes/$noteId',
-  getParentRoute: () => appRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof appIndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
-  '/notes/$noteId': typeof appNotesNoteIdRoute
-  '/notes/new': typeof appNotesNewRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/': typeof appIndexRoute
-  '/notes/$noteId': typeof appNotesNoteIdRoute
-  '/notes/new': typeof appNotesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -66,22 +50,13 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(app)/': typeof appIndexRoute
-  '/(app)/notes/$noteId': typeof appNotesNoteIdRoute
-  '/(app)/notes/new': typeof appNotesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/notes/$noteId' | '/notes/new'
+  fullPaths: '/' | '/login' | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/' | '/notes/$noteId' | '/notes/new'
-  id:
-    | '__root__'
-    | '/(app)'
-    | '/(auth)/login'
-    | '/(auth)/register'
-    | '/(app)/'
-    | '/(app)/notes/$noteId'
-    | '/(app)/notes/new'
+  to: '/login' | '/register' | '/'
+  id: '__root__' | '/(app)' | '/(auth)/login' | '/(auth)/register' | '/(app)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -120,33 +95,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/notes/new': {
-      id: '/(app)/notes/new'
-      path: '/notes/new'
-      fullPath: '/notes/new'
-      preLoaderRoute: typeof appNotesNewRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/notes/$noteId': {
-      id: '/(app)/notes/$noteId'
-      path: '/notes/$noteId'
-      fullPath: '/notes/$noteId'
-      preLoaderRoute: typeof appNotesNoteIdRouteImport
-      parentRoute: typeof appRouteRoute
-    }
   }
 }
 
 interface appRouteRouteChildren {
   appIndexRoute: typeof appIndexRoute
-  appNotesNoteIdRoute: typeof appNotesNoteIdRoute
-  appNotesNewRoute: typeof appNotesNewRoute
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appIndexRoute: appIndexRoute,
-  appNotesNoteIdRoute: appNotesNoteIdRoute,
-  appNotesNewRoute: appNotesNewRoute,
 }
 
 const appRouteRouteWithChildren = appRouteRoute._addFileChildren(

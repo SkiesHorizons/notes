@@ -1,9 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/(app)/")({
-  beforeLoad: () => {
-    throw redirect({
-      to: "/notes/new",
-    })
-  },
+export const Route = createFileRoute('/(app)/')({
+  component: RouteComponent,
 })
+
+function RouteComponent() {
+  return <div>Hello "/(app)/"!</div>
+}
