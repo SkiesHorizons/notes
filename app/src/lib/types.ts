@@ -4,7 +4,7 @@ export type NoteCreate = {
 }
 
 export type NotePatch = {
-  title?: string
+  title?: string | null
   content?: string
 }
 
