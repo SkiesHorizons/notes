@@ -1,2 +1,2 @@
-export * from "./note-editor-modal.tsx";
+export * from "./note-editor-modal";
 

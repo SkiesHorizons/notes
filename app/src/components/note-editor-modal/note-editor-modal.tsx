@@ -1,8 +1,8 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
-import { schema } from "@/lib/blocknotejs.ts"
-import type { Note } from "@/lib/types"
+import { schema } from "@/lib/blocknotejs"
+import type { Note } from "@/lib/models/notes"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
   BlockNoteViewEditor,

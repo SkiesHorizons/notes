@@ -1,6 +1,6 @@
 import { NoteEditorModal, type NoteData } from "@/components/note-editor-modal"
 import { useCreateNoteMutation, useListNotesQuery, usePatchNoteMutation } from "@/hooks/api"
-import type { Note } from "@/lib/types"
+import type { Note } from "@/lib/models/notes"
 import { Button, Skeleton, Stack, Text, UnstyledButton } from "@mantine/core"
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
