@@ -1,21 +1,33 @@
-import { noteMapper } from "@/lib/mappers"
-import type { Note, NoteCreate, NotePatch } from "@/lib/models"
+import { noteMapper } from "@/lib/mappers/notes"
+import type { Note, NoteCreate, NotePatch } from "@/lib/models/notes"
 import { getCurrentUser, supabase } from "@/lib/supabase"
 import { mutationOptions, queryOptions, type DefaultError } from "@tanstack/react-query"
 
-export const listNotesQueryKey = () => ["notes"]
+export interface ListNotesParams {
+  folderId?: string | null
+}
 
-export const listNotesQueryOptions = () =>
+export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", params?.folderId]
+
+export const listNotesQueryOptions = (params?: ListNotesParams) =>
   queryOptions<Note[]>({
-    queryKey: listNotesQueryKey(),
+    queryKey: listNotesQueryKey(params),
     queryFn: async () => {
       const user = await getCurrentUser()
-      const { data, error } = await supabase
+      let query = supabase
         .from("notes")
         .select("*")
         .eq("user_id", user.id)
         .is("deleted_at", null)
         .order("updated_at", { ascending: false })
+
+      if (params?.folderId === null) {
+        query = query.is("folder_id", null)
+      } else if (params?.folderId) {
+        query = query.eq("folder_id", params.folderId)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         throw error

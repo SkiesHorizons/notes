@@ -3,8 +3,12 @@ import { Skeleton, Stack, Text, UnstyledButton } from "@mantine/core"
 import { Link } from "@tanstack/react-router"
 import classes from "./note-browser.module.css"
 
-export function NoteBrowser() {
-  const listNotesQuery = useListNotesQuery()
+interface NoteBrowserProps {
+  selectedFolderId?: string | null
+}
+
+export function NoteBrowser({ selectedFolderId }: NoteBrowserProps) {
+  const listNotesQuery = useListNotesQuery({ folderId: selectedFolderId })
 
   if (listNotesQuery.isLoading) {
     return (
@@ -24,7 +28,7 @@ export function NoteBrowser() {
     <Stack gap="xs">
       {notes.length === 0 ? (
         <Text size="sm" c="dimmed" ta="center" py="md">
-          No notes yet
+          {selectedFolderId ? "No notes in this folder" : "No notes yet"}
         </Text>
       ) : (
         notes.map((note) => (

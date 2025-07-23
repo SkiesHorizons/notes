@@ -1,23 +1,25 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
+import { useListFoldersQuery } from "@/hooks/api"
 import { schema } from "@/lib/blocknotejs"
 import type { Note } from "@/lib/models/notes"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
-  BlockNoteViewEditor,
-  ExperimentalMobileFormattingToolbarController,
-  FormattingToolbarController,
-  useCreateBlockNote,
+    BlockNoteViewEditor,
+    ExperimentalMobileFormattingToolbarController,
+    FormattingToolbarController,
+    useCreateBlockNote,
 } from "@blocknote/react"
-import { Box, Flex, Modal, type ModalProps } from "@mantine/core"
+import { Box, Flex, Group, Modal, Select, type ModalProps } from "@mantine/core"
 import { getHotkeyHandler, useDebouncedCallback, useHotkeys, useMediaQuery, type HotkeyItem } from "@mantine/hooks"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import classes from "./note-editor-modal.module.css"
 
 export type NoteData = {
   title?: string | null
   content?: string
+  folderId?: string | null
 }
 
 interface NoteEditorModalProps {
@@ -27,6 +29,7 @@ interface NoteEditorModalProps {
   onSave: (data: NoteData, noteId?: string) => void
   autoSaveDelay?: number
   size?: ModalProps["size"]
+  initialFolderId?: string | null
 }
 
 export function NoteEditorModal({
@@ -36,8 +39,37 @@ export function NoteEditorModal({
   onSave,
   autoSaveDelay = 2000,
   size = "lg",
+  initialFolderId,
 }: NoteEditorModalProps) {
   const titleRef = useRef<HTMLDivElement>(null)
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    note?.folderId || initialFolderId || null
+  )
+  const { data: folders = [] } = useListFoldersQuery()
+  
+  // Flatten folder tree for Select component
+  const flattenFolders = (folders: any[], prefix = ''): Array<{ value: string; label: string }> => {
+    const result: Array<{ value: string; label: string }> = []
+    folders.forEach((folder) => {
+      const label = prefix + folder.name
+      result.push({ value: folder.id, label })
+      if (folder.children && folder.children.length > 0) {
+        result.push(...flattenFolders(folder.children, label + ' / '))
+      }
+    })
+    return result
+  }
+  
+  const folderOptions = [
+    { value: '', label: 'No folder (Root)' },
+    ...flattenFolders(folders),
+  ]
+  
+  // Update selectedFolderId when note changes
+  useEffect(() => {
+    setSelectedFolderId(note?.folderId || initialFolderId || null)
+  }, [note?.id, note?.folderId, initialFolderId])
+  
   const editor = useCreateBlockNote(
     {
       initialContent: note?.content ? JSON.parse(note.content) : undefined,
@@ -54,6 +86,7 @@ export function NoteEditorModal({
       const newData: NoteData = {
         title: titleRef.current?.textContent?.trim(),
         content: JSON.stringify(editor.document),
+        folderId: selectedFolderId,
       }
       if (newData.title && newData.title !== note?.title) {
         newData.title = newData.title.length > 0 ? newData.title : null
@@ -62,6 +95,9 @@ export function NoteEditorModal({
       }
       if (newData.content === note?.content) {
         newData.content = undefined
+      }
+      if (newData.folderId === note?.folderId) {
+        newData.folderId = undefined
       }
 
       onSave(newData, note?.id)
@@ -162,26 +198,41 @@ export function NoteEditorModal({
       <Modal.Overlay />
       <Modal.Content className={classes.content}>
         <Modal.Header className={classes.header}>
-          <Modal.Title
-            ref={titleRef}
-            title="Note Title"
-            className={classes.editableTitle}
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={saveDebounced}
-            onInput={() => {
-              const titleText = titleRef.current?.textContent
-              if (titleText?.length === 0) {
-                titleRef.current!.textContent = null
-              }
-              saveDebounced()
-            }}
-            onKeyDown={handleTitleKeyDown}
-            data-placeholder="Untitled Note"
-            role="textbox"
-          >
-            {note?.title}
-          </Modal.Title>
+          <Group w="100%" align="flex-start" gap="md">
+            <Modal.Title
+              ref={titleRef}
+              title="Note Title"
+              className={classes.editableTitle}
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={saveDebounced}
+              onInput={() => {
+                const titleText = titleRef.current?.textContent
+                if (titleText?.length === 0) {
+                  titleRef.current!.textContent = null
+                }
+                saveDebounced()
+              }}
+              onKeyDown={handleTitleKeyDown}
+              data-placeholder="Untitled Note"
+              role="textbox"
+              style={{ flex: 1 }}
+            >
+              {note?.title}
+            </Modal.Title>
+            <Select
+              data={folderOptions}
+              value={selectedFolderId || ''}
+              onChange={(value) => {
+                setSelectedFolderId(value || null)
+                saveDebounced()
+              }}
+              placeholder="Select folder"
+              clearable
+              size="sm"
+              style={{ minWidth: 200 }}
+            />
+          </Group>
         </Modal.Header>
         <Modal.Body className={classes.body}>
           <Flex direction="column" gap="md" style={{ height: "100%" }}>

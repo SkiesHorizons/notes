@@ -34,11 +34,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      note_folders: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          depth: number
+          id: string
+          name: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          depth?: number
+          id?: string
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          depth?: number
+          id?: string
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_note_folders_parent_id_on_note_folders"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "note_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           content: string
           created_at: string
           deleted_at: string | null
+          folder_id: string | null
           id: string
           title: string | null
           updated_at: string
@@ -48,6 +90,7 @@ export type Database = {
           content: string
           created_at?: string
           deleted_at?: string | null
+          folder_id?: string | null
           id?: string
           title?: string | null
           updated_at?: string
@@ -57,12 +100,21 @@ export type Database = {
           content?: string
           created_at?: string
           deleted_at?: string | null
+          folder_id?: string | null
           id?: string
           title?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_notes_folder_id_on_note_folders"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "note_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -11,6 +11,7 @@ export const noteMapper = {
     userId: db.user_id,
     title: db.title,
     content: db.content,
+    folderId: db.folder_id,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   }),
@@ -18,11 +19,13 @@ export const noteMapper = {
   toDbInsert: (create: NoteCreate, userId: string): NoteInsert => ({
     title: create.title,
     content: create.content,
+    folder_id: create.folderId,
     user_id: userId,
   }),
   toDbUpdate: (patch: NotePatch): NoteUpdate => ({
     title: patch.title ?? null,
     content: patch.content,
+    folder_id: patch.folderId,
     updated_at: new Date().toISOString(),
   }),
 }

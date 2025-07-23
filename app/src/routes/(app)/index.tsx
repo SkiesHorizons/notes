@@ -18,9 +18,10 @@ function RouteComponent() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined)
   const [modalOpened, setModalOpened] = useState(false)
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
 
-  const listNotesQuery = useListNotesQuery()
+  const listNotesQuery = useListNotesQuery({ folderId: currentFolderId })
   const createNoteMutation = useCreateNoteMutation()
   const patchNoteMutation = usePatchNoteMutation()
   const queryClient = useQueryClient()
@@ -32,19 +33,22 @@ function RouteComponent() {
     }
   }, [isMobile, viewMode])
 
-  const handleCreateNote = () => {
+  const handleCreateNote = (folderId?: string | null) => {
     setSelectedNote(undefined)
+    setCurrentFolderId(folderId || null)
     setModalOpened(true)
   }
 
   const handleEditNote = (note: Note) => {
     setSelectedNote(note)
+    setCurrentFolderId(note.folderId)
     setModalOpened(true)
   }
 
   const handleModalClose = () => {
     setModalOpened(false)
     setSelectedNote(undefined)
+    setCurrentFolderId(null)
   }
 
   const handleNoteSave = async (data: NoteData, noteId?: string) => {
@@ -53,7 +57,8 @@ function RouteComponent() {
         // Create new note
         await createNoteMutation.mutateAsync({ 
           title: data.title || "", 
-          content: data.content || "" 
+          content: data.content || "",
+          folderId: currentFolderId
         })
       } else {
         // Patch existing note
@@ -62,10 +67,12 @@ function RouteComponent() {
           data: {
             title: data.title,
             content: data.content,
+            folderId: currentFolderId,
           },
         })
       }
       queryClient.invalidateQueries({ queryKey: ["notes"] })
+      queryClient.invalidateQueries({ queryKey: ["folders"] })
     } catch (error) {
       console.error("Failed to save note:", error)
     }
@@ -73,13 +80,14 @@ function RouteComponent() {
 
   // Listen for create note events from sidebar
   useEffect(() => {
-    const handleCreateNoteEvent = () => {
-      handleCreateNote()
+    const handleCreateNoteEvent = (event: CustomEvent) => {
+      const folderId = event.detail?.folderId
+      handleCreateNote(folderId)
     }
 
-    window.addEventListener("create-note", handleCreateNoteEvent)
+    window.addEventListener("create-note", handleCreateNoteEvent as EventListener)
     return () => {
-      window.removeEventListener("create-note", handleCreateNoteEvent)
+      window.removeEventListener("create-note", handleCreateNoteEvent as EventListener)
     }
   }, [])
 
@@ -114,7 +122,7 @@ function RouteComponent() {
 
         {!hasNotes ? (
           <Box mt="xl">
-            <NotePlaceholder onCreateNote={handleCreateNote} />
+            <NotePlaceholder onCreateNote={() => handleCreateNote()} />
           </Box>
         ) : (
           <>
@@ -135,6 +143,7 @@ function RouteComponent() {
         onClose={handleModalClose}
         note={selectedNote}
         onSave={handleNoteSave}
+        initialFolderId={currentFolderId}
         size="xl"
       />
     </>

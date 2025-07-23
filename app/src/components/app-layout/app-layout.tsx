@@ -1,10 +1,11 @@
 import { AppHeader } from "@/components/app-header"
 import { NoteBrowser } from "@/components/app-layout/note-browser"
-import { AppShell, Button, ScrollArea } from "@mantine/core"
+import { FolderBrowser } from "@/components/folder-browser"
+import { AppShell, Button, Divider, ScrollArea, Stack } from "@mantine/core"
 import { useDisclosure, useMediaQuery } from "@mantine/hooks"
 import { IconPlus } from "@tabler/icons-react"
 import type { ReactNode } from "react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 interface AppLayoutProps {
   children: ReactNode
@@ -13,6 +14,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [opened, { toggle, close }] = useDisclosure()
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
 
   // Close sidebar on mobile when route changes
   useEffect(() => {
@@ -23,7 +25,10 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const handleCreateNote = () => {
     // Dispatch custom event to trigger note creation from main component
-    window.dispatchEvent(new CustomEvent("create-note"))
+    // Include selected folder in the event
+    window.dispatchEvent(new CustomEvent("create-note", { 
+      detail: { folderId: selectedFolderId } 
+    }))
     if (isMobile) {
       close()
     }
@@ -32,7 +37,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <AppShell
       header={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
+      navbar={{ width: 350, breakpoint: "sm", collapsed: { mobile: !opened } }}
       padding="md"
     >
       <AppShell.Header>
@@ -45,7 +50,14 @@ export function AppLayout({ children }: AppLayoutProps) {
           </Button>
         </AppShell.Section>
         <AppShell.Section component={ScrollArea} grow mt="md" h="100%">
-          <NoteBrowser />
+          <Stack gap="md" h="100%">
+            <FolderBrowser 
+              selectedFolderId={selectedFolderId}
+              onFolderSelect={setSelectedFolderId}
+            />
+            <Divider />
+            <NoteBrowser selectedFolderId={selectedFolderId} />
+          </Stack>
         </AppShell.Section>
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>

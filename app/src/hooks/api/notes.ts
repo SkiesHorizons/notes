@@ -1,9 +1,15 @@
-import { createNoteMutationOptions, deleteNoteMutationOptions, listNotesQueryOptions, patchNoteMutationOptions } from "@/lib/queries"
+import {
+  createNoteMutationOptions,
+  deleteNoteMutationOptions,
+  listNotesQueryOptions,
+  patchNoteMutationOptions,
+  type ListNotesParams,
+} from "@/lib/queries/notes"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
-export function useListNotesQuery(options?: ReturnType<typeof listNotesQueryOptions>) {
+export function useListNotesQuery(params?: ListNotesParams, options?: ReturnType<typeof listNotesQueryOptions>) {
   return useQuery({
-    ...listNotesQueryOptions(),
+    ...listNotesQueryOptions(params),
     ...options,
   })
 }
