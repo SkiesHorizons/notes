@@ -7,7 +7,7 @@ export interface ListNotesParams {
   folderId?: string | null
 }
 
-export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", params?.folderId]
+export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", "list", params?.folderId]
 
 export const listNotesQueryOptions = (params?: ListNotesParams) =>
   queryOptions<Note[]>({
@@ -16,7 +16,7 @@ export const listNotesQueryOptions = (params?: ListNotesParams) =>
       const user = await getCurrentUser()
       let query = supabase
         .from("notes")
-        .select("*")
+        .select()
         .eq("user_id", user.id)
         .is("deleted_at", null)
         .order("updated_at", { ascending: false })

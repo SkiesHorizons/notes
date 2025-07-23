@@ -3,7 +3,7 @@ import type { NoteFolder, NoteFolderCreate, NoteFolderPatch, NoteFolderTree } fr
 import { getCurrentUser, supabase } from "@/lib/supabase"
 import { mutationOptions, queryOptions, type DefaultError } from "@tanstack/react-query"
 
-export const listFoldersQueryKey = () => ["folders"]
+export const listFoldersQueryKey = () => ["folders", "list"]
 
 export const listFoldersQueryOptions = () =>
   queryOptions<NoteFolderTree[]>({
@@ -12,7 +12,7 @@ export const listFoldersQueryOptions = () =>
       const user = await getCurrentUser()
       const { data: folders, error: foldersError } = await supabase
         .from("note_folders")
-        .select("*")
+        .select()
         .eq("user_id", user.id)
         .is("deleted_at", null)
         .order("name")
