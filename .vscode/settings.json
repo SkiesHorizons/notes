@@ -1,0 +1,9 @@
+{
+  "files.readonlyInclude": {
+    "**/.cargo/git/checkouts/**/*.rs": true,
+    "**/.cargo/registry/src/**/*.rs": true,
+    "**/lib/rustlib/src/rust/library/**/*.rs": true,
+    "app/src/routeTree.gen.ts": true,
+    "app/src/lib/supabase/database.types.ts": true
+  }
+}
