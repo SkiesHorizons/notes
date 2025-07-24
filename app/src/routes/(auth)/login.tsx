@@ -1,6 +1,7 @@
 import { LoginForm, type LoginFormValues } from "@/components/login-form"
-import { useLoginMutation } from "@/hooks/api"
+import { loginMutationOptions } from "@/lib/queries"
 import { notifications } from "@mantine/notifications"
+import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router"
 import { z } from "zod"
 
@@ -22,8 +23,9 @@ function RouteComponent() {
   const router = useRouter()
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
-  const loginMutation = useLoginMutation({
-    onSuccess: async (res) => {
+  const loginMutation = useMutation({
+    ...loginMutationOptions(),
+    onSuccess: async (res: any) => {
       if (res.error) {
         notifications.show({
           color: "red",
@@ -47,7 +49,7 @@ function RouteComponent() {
 
       await navigate({ to: search.redirect || authenticatedFallback, replace: true })
     },
-    onError: (err) => {
+    onError: (err: any) => {
       notifications.show({
         color: "red",
         title: "Login failed",

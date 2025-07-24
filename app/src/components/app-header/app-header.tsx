@@ -1,17 +1,6 @@
-import { savingStore } from "@/lib/stores"
 import { supabase } from "@/lib/supabase"
-import {
-  ActionIcon,
-  Avatar,
-  Burger,
-  Group,
-  Image,
-  Loader,
-  Menu,
-  TextInput,
-} from "@mantine/core"
+import { ActionIcon, Avatar, Burger, Group, Image, Menu, TextInput } from "@mantine/core"
 import { IconSearch, IconSettings, IconUser } from "@tabler/icons-react"
-import { useStore } from "@tanstack/react-store"
 import { useState } from "react"
 import classes from "./app-header.module.css"
 
@@ -21,7 +10,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ opened, toggle }: AppHeaderProps) {
-  const saving = useStore(savingStore)
   const [searchValue, setSearchValue] = useState("")
 
   const handleLogout = async () => {
@@ -51,8 +39,6 @@ export function AppHeader({ opened, toggle }: AppHeaderProps) {
       </Group>
 
       <Group gap="xs">
-        {saving && <Loader size="sm" />}
-
         <Menu shadow="md" width={200}>
           <Menu.Target>
             <ActionIcon variant="subtle" size="lg">

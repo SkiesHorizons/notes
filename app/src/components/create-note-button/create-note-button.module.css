@@ -1,0 +1,12 @@
+.createButton {
+  transition: all 0.2s ease;
+}
+
+.createButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.createButton:active {
+  transform: translateY(0);
+}

@@ -1,3 +1,5 @@
+import { CreateNoteButton } from "@/components/create-note-button"
+import { noteEditorModalState } from "@/lib/stores"
 import { ActionIcon, Group, Stack, useMantineColorScheme } from "@mantine/core"
 import { IconFolders, IconHome, IconMoon, IconSettings, IconSun } from "@tabler/icons-react"
 import { Link, useLocation } from "@tanstack/react-router"
@@ -13,8 +15,20 @@ export function AppSidebar() {
     return false
   }
 
+  const handleCreateNote = () => {
+    noteEditorModalState.openCreate()
+  }
+
+  const handleCreateFolder = () => {
+    // Dispatch custom event for creating a folder
+    window.dispatchEvent(new CustomEvent("create-folder"))
+  }
+
   return (
     <Stack p="md" gap="md" h="100%">
+      {/* Create Note Button */}
+      <CreateNoteButton onCreateNote={handleCreateNote} onCreateFolder={handleCreateFolder} variant="button" />
+
       <Stack gap="xs">
         <Link to="/" className={classes.navLink} data-active={isActive("/")}>
           <Group gap="sm">

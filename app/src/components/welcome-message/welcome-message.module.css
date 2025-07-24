@@ -1,0 +1,29 @@
+.welcomeCard {
+  background: linear-gradient(135deg, var(--mantine-color-blue-0) 0%, var(--mantine-color-violet-0) 100%);
+  border: 1px solid var(--mantine-color-gray-2);
+}
+
+[data-mantine-color-scheme="dark"] .welcomeCard {
+  background: linear-gradient(135deg, var(--mantine-color-dark-7) 0%, var(--mantine-color-dark-6) 100%);
+  border: 1px solid var(--mantine-color-dark-4);
+}
+
+.welcomeIcon {
+  color: var(--mantine-color-blue-6);
+}
+
+[data-mantine-color-scheme="dark"] .welcomeIcon {
+  color: var(--mantine-color-blue-4);
+}
+
+.welcomeTitle {
+  color: var(--mantine-color-gray-8);
+}
+
+[data-mantine-color-scheme="dark"] .welcomeTitle {
+  color: var(--mantine-color-gray-0);
+}
+
+.welcomeSubtitle {
+  max-width: 600px;
+}
