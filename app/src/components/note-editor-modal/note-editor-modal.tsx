@@ -6,12 +6,12 @@ import type { Note } from "@/lib/models/notes"
 import { listFoldersQueryOptions } from "@/lib/queries"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
-    BlockNoteViewEditor,
-    ExperimentalMobileFormattingToolbarController,
-    FormattingToolbarController,
-    useCreateBlockNote,
+  BlockNoteViewEditor,
+  ExperimentalMobileFormattingToolbarController,
+  FormattingToolbarController,
+  useCreateBlockNote,
 } from "@blocknote/react"
-import { Box, Flex, Group, Modal, Select, type ModalProps } from "@mantine/core"
+import { Box, Group, Modal, Select, type ModalProps } from "@mantine/core"
 import { getHotkeyHandler, useDebouncedCallback, useHotkeys, useMediaQuery, type HotkeyItem } from "@mantine/hooks"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
@@ -43,34 +43,29 @@ export function NoteEditorModal({
   initialFolderId,
 }: NoteEditorModalProps) {
   const titleRef = useRef<HTMLDivElement>(null)
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
-    note?.folderId || initialFolderId || null
-  )
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(note?.folderId || initialFolderId || null)
   const { data: folders = [] } = useQuery(listFoldersQueryOptions())
-  
+
   // Flatten folder tree for Select component
-  const flattenFolders = (folders: any[], prefix = ''): Array<{ value: string; label: string }> => {
+  const flattenFolders = (folders: any[], prefix = ""): Array<{ value: string; label: string }> => {
     const result: Array<{ value: string; label: string }> = []
     folders.forEach((folder) => {
       const label = prefix + folder.name
       result.push({ value: folder.id, label })
       if (folder.children && folder.children.length > 0) {
-        result.push(...flattenFolders(folder.children, label + ' / '))
+        result.push(...flattenFolders(folder.children, label + " / "))
       }
     })
     return result
   }
-  
-  const folderOptions = [
-    { value: '', label: 'No folder (Root)' },
-    ...flattenFolders(folders),
-  ]
-  
+
+  const folderOptions = [{ value: "", label: "No folder (Root)" }, ...flattenFolders(folders)]
+
   // Update selectedFolderId when note changes
   useEffect(() => {
     setSelectedFolderId(note?.folderId || initialFolderId || null)
   }, [note?.id, note?.folderId, initialFolderId])
-  
+
   const editor = useCreateBlockNote(
     {
       initialContent: note?.content ? JSON.parse(note.content) : undefined,
@@ -195,10 +190,10 @@ export function NoteEditorModal({
       }
 
   return (
-    <Modal.Root opened={opened} onClose={handleClose} {...modalProps}>
+    <Modal.Root opened={opened} onClose={handleClose} {...modalProps} classNames={classes}>
       <Modal.Overlay />
-      <Modal.Content className={classes.content}>
-        <Modal.Header className={classes.header}>
+      <Modal.Content>
+        <Modal.Header>
           <Group w="100%" align="flex-start" gap="md">
             <Modal.Title
               ref={titleRef}
@@ -221,9 +216,26 @@ export function NoteEditorModal({
             >
               {note?.title}
             </Modal.Title>
+          </Group>
+        </Modal.Header>
+        <Modal.Body>
+          <BlockNoteView
+            editor={editor}
+            onChange={saveDebounced}
+            formattingToolbar={false}
+            onContextMenu={(e) => e.preventDefault()}
+            onKeyDown={handleContentEditorKeyDown}
+            renderEditor={false}
+          >
+            {!isMobile && <FormattingToolbarController />}
+            {isMobile && <ExperimentalMobileFormattingToolbarController />}
+            <BlockNoteViewEditor data-autofocus />
+          </BlockNoteView>
+          <Box flex={1} pb="md" onClick={focusContentEditorEnd} />
+          <Group>
             <Select
               data={folderOptions}
-              value={selectedFolderId || ''}
+              value={selectedFolderId || ""}
               onChange={(value) => {
                 setSelectedFolderId(value || null)
                 saveDebounced()
@@ -234,23 +246,6 @@ export function NoteEditorModal({
               style={{ minWidth: 200 }}
             />
           </Group>
-        </Modal.Header>
-        <Modal.Body className={classes.body}>
-          <Flex direction="column" gap="md" style={{ height: "100%" }}>
-            <BlockNoteView
-              editor={editor}
-              onChange={saveDebounced}
-              formattingToolbar={false}
-              onContextMenu={(e) => e.preventDefault()}
-              onKeyDown={handleContentEditorKeyDown}
-              renderEditor={false}
-            >
-              {!isMobile && <FormattingToolbarController />}
-              {isMobile && <ExperimentalMobileFormattingToolbarController />}
-              <BlockNoteViewEditor data-autofocus />
-            </BlockNoteView>
-            <Box flex={1} onClick={focusContentEditorEnd} />
-          </Flex>
         </Modal.Body>
       </Modal.Content>
     </Modal.Root>
