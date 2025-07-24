@@ -1,21 +1,28 @@
-import { Box, Text, UnstyledButton } from "@mantine/core"
+import { Box, Text, UnstyledButton, type UnstyledButtonProps } from "@mantine/core"
 import { IconPlus } from "@tabler/icons-react"
+import type { ReactNode } from "react"
 import classes from "./note-placeholder.module.css"
 
-interface NotePlaceholderProps {
-  onCreateNote: () => void
+interface NotePlaceholderProps extends UnstyledButtonProps {
+  title?: ReactNode
+  description?: ReactNode
+  onClick?: () => void
 }
 
-export function NotePlaceholder({ onCreateNote }: NotePlaceholderProps) {
+export function NotePlaceholder({
+  title = "Create new note",
+  description = "Click here to start writing",
+  ...props
+}: NotePlaceholderProps) {
   return (
-    <UnstyledButton onClick={onCreateNote} className={classes.placeholder}>
+    <UnstyledButton {...props} className={classes.placeholder}>
       <Box className={classes.content}>
         <IconPlus size={24} className={classes.icon} />
         <Text size="lg" fw={500} mb="xs">
-          Create your first note
+          {title}
         </Text>
         <Text size="sm" c="dimmed">
-          Click here to start writing
+          {description}
         </Text>
       </Box>
     </UnstyledButton>

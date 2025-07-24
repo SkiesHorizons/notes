@@ -1,64 +1,51 @@
 import { NoteEditorModal, type NoteData } from "@/components/note-editor-modal"
 import { NoteList } from "@/components/note-list"
-import { NotePlaceholder } from "@/components/note-placeholder"
-import { ViewToggle, type ViewMode } from "@/components/view-toggle"
-import { useCreateNoteMutation, useListNotesQuery, usePatchNoteMutation } from "@/hooks/api"
 import type { Note } from "@/lib/models/notes"
-import { Box, Group, Skeleton, Stack, Text, Title } from "@mantine/core"
-import { useMediaQuery } from "@mantine/hooks"
-import { useQueryClient } from "@tanstack/react-query"
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from "react"
+import { createNoteMutationOptions, listNotesQueryOptions, patchNoteMutationOptions } from "@/lib/queries"
+import { Group, Skeleton, Stack, Title } from "@mantine/core"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
 
-export const Route = createFileRoute('/(app)/')({
+export const Route = createFileRoute("/(app)/")({
   component: RouteComponent,
+  loader: async ({ context: { queryClient } }) => {
+    queryClient.prefetchQuery(listNotesQueryOptions())
+  },
 })
 
 function RouteComponent() {
-  const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined)
   const [modalOpened, setModalOpened] = useState(false)
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
-  const isMobile = useMediaQuery("(max-width: 768px)")
 
-  const listNotesQuery = useListNotesQuery({ folderId: currentFolderId })
-  const createNoteMutation = useCreateNoteMutation()
-  const patchNoteMutation = usePatchNoteMutation()
+  const recentNotesQuery = useQuery(listNotesQueryOptions())
+  const createNoteMutation = useMutation(createNoteMutationOptions())
+  const patchNoteMutation = useMutation(patchNoteMutationOptions())
   const queryClient = useQueryClient()
 
-  // Switch to grid view if on mobile and currently in masonry
-  useEffect(() => {
-    if (isMobile && viewMode === "masonry") {
-      setViewMode("grid")
-    }
-  }, [isMobile, viewMode])
-
-  const handleCreateNote = (folderId?: string | null) => {
+  const handleCreateNote = () => {
     setSelectedNote(undefined)
-    setCurrentFolderId(folderId || null)
     setModalOpened(true)
   }
 
   const handleEditNote = (note: Note) => {
     setSelectedNote(note)
-    setCurrentFolderId(note.folderId)
     setModalOpened(true)
   }
 
   const handleModalClose = () => {
     setModalOpened(false)
     setSelectedNote(undefined)
-    setCurrentFolderId(null)
   }
 
   const handleNoteSave = async (data: NoteData, noteId?: string) => {
     try {
       if (!noteId) {
-        // Create new note
-        await createNoteMutation.mutateAsync({ 
-          title: data.title || "", 
+        // Create new note without folder (home page only shows notes without folders)
+        await createNoteMutation.mutateAsync({
+          title: data.title || "",
           content: data.content || "",
-          folderId: currentFolderId
+          folderId: null,
         })
       } else {
         // Patch existing note
@@ -67,7 +54,7 @@ function RouteComponent() {
           data: {
             title: data.title,
             content: data.content,
-            folderId: currentFolderId,
+            folderId: data.folderId,
           },
         })
       }
@@ -79,24 +66,17 @@ function RouteComponent() {
   }
 
   // Listen for create note events from sidebar
-  useEffect(() => {
-    const handleCreateNoteEvent = (event: CustomEvent) => {
-      const folderId = event.detail?.folderId
-      handleCreateNote(folderId)
-    }
+  const handleCreateNoteEvent = () => {
+    handleCreateNote()
+  }
 
-    window.addEventListener("create-note", handleCreateNoteEvent as EventListener)
-    return () => {
-      window.removeEventListener("create-note", handleCreateNoteEvent as EventListener)
-    }
-  }, [])
+  window.addEventListener("create-note", handleCreateNoteEvent as EventListener)
 
-  if (listNotesQuery.isLoading) {
+  if (recentNotesQuery.isLoading) {
     return (
       <Stack gap="md">
         <Group justify="space-between">
-          <Title order={2}>Notes</Title>
-          <ViewToggle value={viewMode} onChange={setViewMode} />
+          <Title order={2}>Recent Notes</Title>
         </Group>
         <Stack gap="md">
           {Array(6)
@@ -109,33 +89,16 @@ function RouteComponent() {
     )
   }
 
-  const notes = listNotesQuery.data || []
-  const hasNotes = notes.length > 0
+  const recentNotes = recentNotesQuery.data || []
 
   return (
     <>
       <Stack gap="md">
         <Group justify="space-between">
-          <Title order={2}>My Notes</Title>
-          {hasNotes && <ViewToggle value={viewMode} onChange={setViewMode} />}
+          <Title order={2}>Recent Notes</Title>
         </Group>
 
-        {!hasNotes ? (
-          <Box mt="xl">
-            <NotePlaceholder onCreateNote={() => handleCreateNote()} />
-          </Box>
-        ) : (
-          <>
-            <Text size="sm" c="dimmed">
-              {notes.length} {notes.length === 1 ? "note" : "notes"}
-            </Text>
-            <NoteList 
-              notes={notes} 
-              viewMode={viewMode} 
-              onEditNote={handleEditNote} 
-            />
-          </>
-        )}
+        <NoteList notes={recentNotes} onEditNote={handleEditNote} onCreateNote={handleCreateNote} />
       </Stack>
 
       <NoteEditorModal
@@ -143,7 +106,7 @@ function RouteComponent() {
         onClose={handleModalClose}
         note={selectedNote}
         onSave={handleNoteSave}
-        initialFolderId={currentFolderId}
+        initialFolderId={null}
         size="xl"
       />
     </>

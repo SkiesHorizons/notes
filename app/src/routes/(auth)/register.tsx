@@ -1,8 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
 import { RegisterForm, type RegisterFormValues } from "@/components/register-form"
-import { useRegisterMutation } from "@/hooks/api"
-import { notifications } from "@mantine/notifications"
+import { registerMutationOptions } from "@/lib/queries"
 import { authenticatedFallback } from "@/routes/(auth)/login"
+import { notifications } from "@mantine/notifications"
+import { useMutation } from "@tanstack/react-query"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/(auth)/register")({
   beforeLoad: async ({ context }) => {
@@ -17,7 +18,8 @@ export const Route = createFileRoute("/(auth)/register")({
 
 function RouteComponent() {
   const navigate = Route.useNavigate()
-  const registerMutation = useRegisterMutation({
+  const registerMutation = useMutation({
+    ...registerMutationOptions(),
     onSuccess: async () => {
       notifications.show({
         color: "green",
@@ -27,7 +29,7 @@ function RouteComponent() {
       })
       await navigate({ to: "/login", replace: true })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       notifications.show({
         color: "red",
         title: "Registration failed",

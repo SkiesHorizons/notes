@@ -1,6 +1,6 @@
 import { NoteContent } from "@/components/note-card/note-content"
 import type { Note } from "@/lib/models/notes"
-import { ActionIcon, Box, Breadcrumbs, Card, type CardProps, Menu, Stack, Text, Title } from "@mantine/core"
+import { ActionIcon, Box, Breadcrumbs, Card, type CardProps, Menu, Text, Title } from "@mantine/core"
 import { IconDots, IconEdit, IconTrash } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useState } from "react"
@@ -8,19 +8,19 @@ import classes from "./note-card.module.css"
 
 interface NoteCardProps extends CardProps {
   note: Note
+  renderContent: (blocks: any) => Promise<string>
   onEdit: (note: Note) => void
   onDelete?: (noteId: string) => void
   showFolderBreadcrumbs?: boolean
-  renderContent: (blocks: any) => Promise<string>
   folderPath?: string[]
 }
 
 export function NoteCard({
   note,
+  renderContent,
   onEdit,
   onDelete,
   showFolderBreadcrumbs = false,
-  renderContent,
   folderPath = [],
   ...cardProps
 }: NoteCardProps) {
@@ -38,27 +38,27 @@ export function NoteCard({
       onMouseLeave={() => setIsHovered(false)}
       {...cardProps}
     >
-      <Stack gap="xs">
-        {showFolderBreadcrumbs && folderPath.length > 0 && (
-          <Breadcrumbs c="dimmed">
-            {folderPath.map((folder, index) => (
-              <Text key={index} size="xs">
-                {folder}
-              </Text>
-            ))}
-          </Breadcrumbs>
-        )}
+      {showFolderBreadcrumbs && folderPath.length > 0 && (
+        <Breadcrumbs c="dimmed">
+          {folderPath.map((folder, index) => (
+            <Text key={index} size="xs">
+              {folder}
+            </Text>
+          ))}
+        </Breadcrumbs>
+      )}
 
-        <Text size="xs" c="dimmed">
-          {dayjs(note.updatedAt).format("MMM D, YYYY [at] h:mm A")}
-        </Text>
+      <Text size="xs" c="dimmed" pb="xs">
+        {dayjs(note.updatedAt).format("MMM D, YYYY [at] h:mm A")}
+      </Text>
 
-        <Title order={4} lineClamp={2} className={classes.title}>
-          {note.title || "Untitled Note"}
+      {note.title && (
+        <Title order={3} className={classes.title} pb="xs" lineClamp={2}>
+          {note.title}
         </Title>
+      )}
 
-        <NoteContent contentJson={note.content} renderContent={renderContent} />
-      </Stack>
+      <NoteContent contentJson={note.content} renderContent={renderContent} />
 
       {isHovered && (
         <Box className={classes.menuContainer}>

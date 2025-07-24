@@ -1,9 +1,9 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
-import { useListFoldersQuery } from "@/hooks/api"
 import { schema } from "@/lib/blocknotejs"
 import type { Note } from "@/lib/models/notes"
+import { listFoldersQueryOptions } from "@/lib/queries"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
     BlockNoteViewEditor,
@@ -13,6 +13,7 @@ import {
 } from "@blocknote/react"
 import { Box, Flex, Group, Modal, Select, type ModalProps } from "@mantine/core"
 import { getHotkeyHandler, useDebouncedCallback, useHotkeys, useMediaQuery, type HotkeyItem } from "@mantine/hooks"
+import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import classes from "./note-editor-modal.module.css"
 
@@ -45,7 +46,7 @@ export function NoteEditorModal({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
     note?.folderId || initialFolderId || null
   )
-  const { data: folders = [] } = useListFoldersQuery()
+  const { data: folders = [] } = useQuery(listFoldersQueryOptions())
   
   // Flatten folder tree for Select component
   const flattenFolders = (folders: any[], prefix = ''): Array<{ value: string; label: string }> => {

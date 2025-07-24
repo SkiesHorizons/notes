@@ -7,7 +7,7 @@ export interface ListNotesParams {
   folderId?: string | null
 }
 
-export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", "list", params?.folderId]
+export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", "list", params]
 
 export const listNotesQueryOptions = (params?: ListNotesParams) =>
   queryOptions<Note[]>({

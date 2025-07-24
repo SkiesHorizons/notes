@@ -1,8 +1,9 @@
-import { useCreateFolderMutation, useDeleteFolderMutation, useListFoldersQuery, usePatchFolderMutation } from '@/hooks/api';
 import type { NoteFolderCreate, NoteFolderPatch, NoteFolderTree } from '@/lib/models';
+import { createFolderMutationOptions, deleteFolderMutationOptions, listFoldersQueryOptions, patchFolderMutationOptions } from '@/lib/queries';
 import { ActionIcon, Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconChevronDown, IconChevronRight, IconEdit, IconFolder, IconFolderPlus, IconNote, IconTrash } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import classes from './folder-browser.module.css';
 
@@ -138,8 +139,8 @@ function FolderItem({
 
 function FolderModal({ folder, parentFolder, isOpen, onClose, onSuccess }: FolderModalProps) {
   const [name, setName] = useState(folder?.name || '');
-  const createFolderMutation = useCreateFolderMutation();
-  const patchFolderMutation = usePatchFolderMutation();
+  const createFolderMutation = useMutation(createFolderMutationOptions());
+  const patchFolderMutation = useMutation(patchFolderMutationOptions());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,8 +207,8 @@ function FolderModal({ folder, parentFolder, isOpen, onClose, onSuccess }: Folde
 }
 
 export function FolderBrowser({ selectedFolderId, onFolderSelect }: FolderBrowserProps) {
-  const { data: folders = [], refetch } = useListFoldersQuery();
-  const deleteFolderMutation = useDeleteFolderMutation();
+  const { data: folders = [], refetch } = useQuery(listFoldersQueryOptions());
+  const deleteFolderMutation = useMutation(deleteFolderMutationOptions());
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [editingFolder, setEditingFolder] = useState<NoteFolderTree | undefined>();
   const [parentFolder, setParentFolder] = useState<NoteFolderTree | undefined>();

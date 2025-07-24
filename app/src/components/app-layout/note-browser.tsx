@@ -1,5 +1,6 @@
-import { useListNotesQuery } from "@/hooks/api"
+import { listNotesQueryOptions } from "@/lib/queries"
 import { Skeleton, Stack, Text, UnstyledButton } from "@mantine/core"
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import classes from "./note-browser.module.css"
 
@@ -8,7 +9,7 @@ interface NoteBrowserProps {
 }
 
 export function NoteBrowser({ selectedFolderId }: NoteBrowserProps) {
-  const listNotesQuery = useListNotesQuery({ folderId: selectedFolderId })
+  const listNotesQuery = useQuery(listNotesQueryOptions({ folderId: selectedFolderId }))
 
   if (listNotesQuery.isLoading) {
     return (

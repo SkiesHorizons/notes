@@ -1,17 +1,16 @@
 import { savingStore } from "@/lib/stores"
 import { supabase } from "@/lib/supabase"
 import {
-    ActionIcon,
-    Avatar,
-    Burger,
-    Group,
-    Image,
-    Loader,
-    Menu,
-    TextInput,
-    useMantineColorScheme,
+  ActionIcon,
+  Avatar,
+  Burger,
+  Group,
+  Image,
+  Loader,
+  Menu,
+  TextInput,
 } from "@mantine/core"
-import { IconMoon, IconSearch, IconSettings, IconSun, IconUser } from "@tabler/icons-react"
+import { IconSearch, IconSettings, IconUser } from "@tabler/icons-react"
 import { useStore } from "@tanstack/react-store"
 import { useState } from "react"
 import classes from "./app-header.module.css"
@@ -22,7 +21,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ opened, toggle }: AppHeaderProps) {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const saving = useStore(savingStore)
   const [searchValue, setSearchValue] = useState("")
 
@@ -54,19 +52,6 @@ export function AppHeader({ opened, toggle }: AppHeaderProps) {
 
       <Group gap="xs">
         {saving && <Loader size="sm" />}
-        
-        <ActionIcon
-          variant="subtle"
-          onClick={() => toggleColorScheme()}
-          size="lg"
-          aria-label="Toggle color scheme"
-        >
-          {colorScheme === "dark" ? <IconSun size={18} /> : <IconMoon size={18} />}
-        </ActionIcon>
-
-        <ActionIcon variant="subtle" size="lg" aria-label="Settings">
-          <IconSettings size={18} />
-        </ActionIcon>
 
         <Menu shadow="md" width={200}>
           <Menu.Target>
