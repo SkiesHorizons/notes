@@ -23,7 +23,7 @@ export const noteMapper = {
     user_id: userId,
   }),
   toDbUpdate: (patch: NotePatch): NoteUpdate => ({
-    title: patch.title ?? null,
+    title: patch.title,
     content: patch.content,
     folder_id: patch.folderId,
     updated_at: new Date().toISOString(),

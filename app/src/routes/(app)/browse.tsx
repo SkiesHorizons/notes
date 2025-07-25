@@ -5,7 +5,7 @@ import { NoteList } from "@/components/note-list"
 import type { NoteFolder } from "@/lib/models/note-folder"
 import type { Note } from "@/lib/models/notes"
 import { queries } from "@/lib/queries"
-import { noteEditorModalState } from "@/lib/stores"
+import { noteEditorModal } from "@/lib/stores"
 import { ActionIcon, Box, Group, Skeleton, Stack, Title } from "@mantine/core"
 import { IconChevronLeft } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
@@ -18,18 +18,18 @@ export const Route = createFileRoute("/(app)/browse")({
   validateSearch: z.object({
     folderId: z.string().optional(),
   }),
-  loader: async ({ context: { queryClient } }) => {
+  loader: ({ context: { queryClient } }) => {
     queryClient.prefetchQuery(queries.folders.list({ parentId: null }))
   },
 })
 
 function RouteComponent() {
   const navigate = useNavigate()
-  const { folderId } = Route.useSearch()
+  const { folderId = null } = Route.useSearch()
   const [folderModalOpened, setFolderModalOpened] = useState(false)
 
   // Use the new specific queries instead of fetching all folders
-  const currentFolderQuery = useQuery(queries.folders.detail(folderId, { path: true }))
+  const currentFolderQuery = useQuery(queries.folders.detail(folderId || undefined, { path: true }))
   const childFoldersQuery = useQuery(queries.folders.list({ parentId: folderId }))
   const listNotesQuery = useQuery(queries.notes.list({ folderId }))
 
@@ -47,11 +47,11 @@ function RouteComponent() {
   }
 
   const handleCreateNote = () => {
-    noteEditorModalState.openCreate(folderId)
+    noteEditorModal.openCreate(folderId || undefined)
   }
 
   const handleEditNote = (note: Note) => {
-    noteEditorModalState.openEdit(note)
+    noteEditorModal.openEdit(note)
   }
 
   // Listen for create folder events from sidebar

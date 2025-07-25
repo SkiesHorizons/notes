@@ -2,10 +2,11 @@ import { CreateFolderModal } from "@/components/create-folder-modal"
 import { NoteList } from "@/components/note-list"
 import { WelcomeMessage } from "@/components/welcome-message"
 import type { Note } from "@/lib/models/notes"
-import { queries } from "@/lib/queries"
-import { noteEditorModalState } from "@/lib/stores"
+import { mutations, queries } from "@/lib/queries"
+import { noteEditorModal } from "@/lib/stores"
 import { Group, Skeleton, Stack, Title } from "@mantine/core"
-import { useQuery } from "@tanstack/react-query"
+import { notifications } from "@mantine/notifications"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
@@ -21,11 +22,29 @@ function RouteComponent() {
   const recentNotesQuery = useQuery(queries.notes.list())
 
   const handleCreateNote = () => {
-    noteEditorModalState.openCreate()
+    noteEditorModal.openCreate()
   }
 
   const handleEditNote = (note: Note) => {
-    noteEditorModalState.openEdit(note)
+    noteEditorModal.openEdit(note)
+  }
+
+  const { mutate: deleteNote } = useMutation({
+    ...mutations.notes.delete(),
+    onSuccess: async () => {
+      await recentNotesQuery.refetch()
+    },
+    onError: (error) => {
+      notifications.show({
+        color: "red",
+        title: "Error deleting note",
+        message: error.message || "An error occurred while deleting the note.",
+      })
+    },
+  })
+
+  const handleDeleteNote = (noteId: string) => {
+    deleteNote({ noteId })
   }
 
   if (recentNotesQuery.isLoading) {
@@ -56,7 +75,12 @@ function RouteComponent() {
           <Title order={2}>Recent Notes</Title>
         </Group>
 
-        <NoteList notes={recentNotes} onEditNote={handleEditNote} onCreateNote={handleCreateNote} />
+        <NoteList
+          notes={recentNotes}
+          onEditNote={handleEditNote}
+          onCreateNote={handleCreateNote}
+          onDeleteNote={handleDeleteNote}
+        />
       </Stack>
 
       <CreateFolderModal opened={folderModalOpened} onClose={() => setFolderModalOpened(false)} parentFolderId={null} />

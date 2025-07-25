@@ -1,10 +1,8 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
-import { schema } from "@/lib/blocknotejs"
-import type { NoteFolder } from "@/lib/models"
-import type { Note } from "@/lib/models/notes"
-import { queries } from "@/lib/queries"
+import { schema } from "@/lib/blocknote/schema.ts"
+import { mutations, queries } from "@/lib/queries"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
   BlockNoteViewEditor,
@@ -12,94 +10,123 @@ import {
   FormattingToolbarController,
   useCreateBlockNote,
 } from "@blocknote/react"
-import { Box, Group, Modal, type ModalProps, Select } from "@mantine/core"
+import { Group, Modal, type ModalProps, ScrollArea, Select } from "@mantine/core"
 import { getHotkeyHandler, type HotkeyItem, useDebouncedCallback, useHotkeys, useMediaQuery } from "@mantine/hooks"
-import { useQuery } from "@tanstack/react-query"
-import { useEffect, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useMemo, useRef, useState } from "react"
 import classes from "./note-editor-modal.module.css"
+import { noteEditorModal } from "@/lib/stores"
+import { useStore } from "@tanstack/react-store"
+import { notifications } from "@mantine/notifications"
+import type { Note } from "@/lib/models"
 
-export type NoteData = {
-  title?: string | null
-  content?: string
-  folderId?: string | null
-}
-
-interface NoteEditorModalProps {
-  opened: boolean
-  onClose: () => void
-  note?: Note
-  onSave: (data: NoteData, noteId?: string) => void
-  autoSaveDelay?: number
-  size?: ModalProps["size"]
-  initialFolderId?: string | null
-}
-
-export function NoteEditorModal({
-  opened,
-  onClose,
-  note,
-  onSave,
-  autoSaveDelay = 2000,
-  size = "lg",
-  initialFolderId,
-}: NoteEditorModalProps) {
+export function NoteEditorModal() {
+  const { opened, initialNote, initialFolderId, editingNoteId } = useStore(noteEditorModal.store)
   const titleRef = useRef<HTMLDivElement>(null)
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(note?.folderId || initialFolderId || null)
-  const { data: folders = [] } = useQuery(queries.folders.list())
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(initialNote?.folderId || null)
+  const folderSelectRef = useRef<HTMLInputElement>(null)
 
-  // Flatten folder tree for Select component
-  const flattenFolders = (folders: NoteFolder[]): Array<{ value: string; label: string }> => {
-    const result: Array<{ value: string; label: string }> = []
-    folders.forEach((folder) => {
-      result.push({
-        value: folder.id,
-        label: folder.name,
-      })
-    })
-    return result
-  }
-
-  const folderOptions = [{ value: "", label: "No folder (Root)" }, ...flattenFolders(folders)]
-
-  // Update selectedFolderId when note changes
   useEffect(() => {
-    setSelectedFolderId(note?.folderId || initialFolderId || null)
-  }, [note?.id, note?.folderId, initialFolderId])
+    setSelectedFolderId(initialNote?.folderId || initialFolderId || null)
+  }, [setSelectedFolderId, initialNote, initialFolderId])
+
+  const queryClient = useQueryClient()
+
+  const { mutate: createNote } = useMutation({
+    ...mutations.notes.create(),
+    onSuccess: async (created) => {
+      noteEditorModal.updateEditingNoteId(created.id)
+      await queryClient.invalidateQueries({
+        queryKey: queries.notes.list().queryKey,
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        color: "red",
+        title: "Error creating note",
+        message: error.message || "An error occurred while creating the note.",
+      })
+    },
+  })
+
+  const { mutate: patchNote } = useMutation({
+    ...mutations.notes.patch(),
+    onSuccess: async (updated) => {
+      noteEditorModal.updateEditingNoteId(updated.id)
+      await queryClient.setQueryData(queries.notes.list().queryKey, (old: Note[]) =>
+        old.map((note) => (note.id === updated.id ? updated : note)),
+      )
+    },
+    onError: (error) => {
+      notifications.show({
+        color: "red",
+        title: "Error updating note",
+        message: error.message || "An error occurred while updating the note.",
+      })
+    },
+  })
+
+  const { data: folders = [] } = useQuery(queries.folders.list())
+  const folderOptions = useMemo(() => {
+    return folders.map((folder) => ({
+      value: folder.id,
+      label: folder.name,
+    }))
+  }, [folders])
 
   const editor = useCreateBlockNote(
     {
-      initialContent: note?.content ? JSON.parse(note.content) : undefined,
+      initialContent: initialNote?.content ? JSON.parse(initialNote.content) : undefined,
       schema: schema,
       heading: {
         levels: [1, 2, 3, 4, 5, 6],
       },
     },
-    [note?.id],
+    [initialNote],
   )
 
   const saveDebounced = useDebouncedCallback(
     () => {
-      const newData: NoteData = {
-        title: titleRef.current?.textContent?.trim(),
-        content: JSON.stringify(editor.document),
-        folderId: selectedFolderId,
+      let title: string | null | undefined = titleRef.current?.textContent
+      let content: string | undefined = JSON.stringify(editor.document)
+      let folderId: string | null | undefined = selectedFolderId
+
+      if (title === initialNote?.title) {
+        title = undefined
       }
-      if (newData.title && newData.title !== note?.title) {
-        newData.title = newData.title.length > 0 ? newData.title : null
-      } else {
-        newData.title = undefined
+      if (content === initialNote?.content) {
+        content = undefined
       }
-      if (newData.content === note?.content) {
-        newData.content = undefined
+      if (folderId === initialNote?.folderId) {
+        folderId = undefined
       }
-      if (newData.folderId === note?.folderId) {
-        newData.folderId = undefined
+      if (title === undefined && content === undefined && folderId === undefined) {
+        return
       }
 
-      onSave(newData, note?.id)
+      if (editingNoteId) {
+        patchNote({
+          noteId: editingNoteId,
+          data: {
+            title,
+            content,
+            folderId,
+          },
+        })
+        return
+      }
+
+      if (!content) {
+        return
+      }
+      createNote({
+        title,
+        content,
+        folderId,
+      })
     },
     {
-      delay: autoSaveDelay,
+      delay: 2000,
       flushOnUnmount: true,
     },
   )
@@ -114,7 +141,7 @@ export function NoteEditorModal({
     return () => {
       saveImmediately()
     }
-  }, [note?.id])
+  }, [editingNoteId])
 
   const saveHotkey: HotkeyItem = ["mod+S", saveImmediately]
   useHotkeys([saveHotkey])
@@ -154,7 +181,7 @@ export function NoteEditorModal({
 
   const handleClose = () => {
     saveImmediately()
-    onClose()
+    noteEditorModal.close()
   }
 
   const handleTitleKeyDown = getHotkeyHandler([
@@ -174,18 +201,13 @@ export function NoteEditorModal({
     ],
   ])
 
-  const focusContentEditorEnd = () => {
-    editor.setTextCursorPosition(editor.document[editor.document.length - 1].id, "end")
-    editor.focus()
-  }
-
   const modalProps: Partial<ModalProps> = isMobile
     ? {
         fullScreen: true,
         transitionProps: { transition: "slide-up" },
       }
     : {
-        size,
+        size: "lg",
         centered: true,
       }
 
@@ -214,11 +236,11 @@ export function NoteEditorModal({
               role="textbox"
               style={{ flex: 1 }}
             >
-              {note?.title}
+              {initialNote?.title}
             </Modal.Title>
           </Group>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body component={ScrollArea}>
           <BlockNoteView
             editor={editor}
             onChange={saveDebounced}
@@ -231,22 +253,24 @@ export function NoteEditorModal({
             {isMobile && <ExperimentalMobileFormattingToolbarController />}
             <BlockNoteViewEditor data-autofocus />
           </BlockNoteView>
-          <Box flex={1} pb="md" onClick={focusContentEditorEnd} />
-          <Group>
-            <Select
-              data={folderOptions}
-              value={selectedFolderId || ""}
-              onChange={(value) => {
-                setSelectedFolderId(value || null)
-                saveDebounced()
-              }}
-              placeholder="Select folder"
-              clearable
-              size="sm"
-              style={{ minWidth: 200 }}
-            />
-          </Group>
         </Modal.Body>
+        {/* Modal footer */}
+        <Group component="footer" p="md" pt={0} pos="sticky" left={0} bottom={0}>
+          <Select
+            ref={folderSelectRef}
+            searchable
+            data={folderOptions}
+            value={selectedFolderId}
+            onChange={(value) => {
+              setSelectedFolderId(value)
+              saveDebounced()
+            }}
+            placeholder="Select folder"
+            clearable
+            size="sm"
+            style={{ minWidth: 200 }}
+          />
+        </Group>
       </Modal.Content>
     </Modal.Root>
   )

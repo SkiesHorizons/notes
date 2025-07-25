@@ -1,9 +1,9 @@
 import { NoteCard } from "@/components/note-card"
 import { NotePlaceholder } from "@/components/note-placeholder"
-import { renderHtml } from "@/lib/blocknotejs"
 import type { Note } from "@/lib/models/notes"
 import type { Block } from "@blocknote/core"
 import { SimpleGrid } from "@mantine/core"
+import { renderHtml } from "@/lib/blocknote/utils.ts"
 
 interface NoteListProps {
   notes: Note[]

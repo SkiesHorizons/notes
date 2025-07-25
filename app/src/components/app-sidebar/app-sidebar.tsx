@@ -1,5 +1,5 @@
 import { CreateNoteButton } from "@/components/create-note-button"
-import { noteEditorModalState } from "@/lib/stores"
+import { noteEditorModal } from "@/lib/stores"
 import { ActionIcon, Group, Stack, useMantineColorScheme } from "@mantine/core"
 import { IconFolders, IconHome, IconMoon, IconSettings, IconSun } from "@tabler/icons-react"
 import { Link, useLocation } from "@tanstack/react-router"
@@ -16,7 +16,7 @@ export function AppSidebar() {
   }
 
   const handleCreateNote = () => {
-    noteEditorModalState.openCreate()
+    noteEditorModal.openCreate()
   }
 
   const handleCreateFolder = () => {
