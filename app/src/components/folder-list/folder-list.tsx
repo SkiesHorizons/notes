@@ -1,10 +1,10 @@
 import { FolderCard } from "@/components/folder-card"
 import { FolderPlaceholder } from "@/components/folder-placeholder"
-import type { NoteFolderTree } from "@/lib/models/note-folder"
+import type { NoteFolder } from "@/lib/models/note-folder"
 import { SimpleGrid } from "@mantine/core"
 
 interface FolderListProps {
-  folders: NoteFolderTree[]
+  folders: NoteFolder[]
   onFolderClick: (folderId: string) => void
 }
 

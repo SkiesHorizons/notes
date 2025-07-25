@@ -1,9 +1,15 @@
-import type { NoteFolder, NoteFolderCreate, NoteFolderPatch, NoteFolderTree } from "@/lib/models/note-folder"
-import type { Database } from "@/lib/supabase"
+import type {
+  FolderPath,
+  NoteFolder,
+  NoteFolderCreate,
+  NoteFolderPatch,
+  NoteFolderTree,
+} from "@/lib/models/note-folder"
+import type { Json, Tables, TablesInsert, TablesUpdate } from "@/lib/supabase"
 
-type NoteFolderRow = Database["public"]["Tables"]["note_folders"]["Row"]
-type NoteFolderInsert = Database["public"]["Tables"]["note_folders"]["Insert"]
-type NoteFolderUpdate = Database["public"]["Tables"]["note_folders"]["Update"]
+type NoteFolderRow = Tables<"note_folders"> & { notes?: { count: number }[]; path?: Json }
+type NoteFolderInsert = TablesInsert<"note_folders">
+type NoteFolderUpdate = TablesUpdate<"note_folders">
 
 export const noteFolderMapper = {
   toModel: (db: NoteFolderRow): NoteFolder => ({
@@ -12,6 +18,8 @@ export const noteFolderMapper = {
     name: db.name,
     parentId: db.parent_id,
     depth: db.depth,
+    noteCount: db.notes?.[0]?.count,
+    path: db.path ? (db.path as unknown as FolderPath[]) : undefined,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   }),

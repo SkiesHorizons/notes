@@ -1,4 +1,4 @@
-import { listNotesQueryOptions } from "@/lib/queries"
+import { queries } from "@/lib/queries"
 import { Skeleton, Stack, Text, UnstyledButton } from "@mantine/core"
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
@@ -9,7 +9,7 @@ interface NoteBrowserProps {
 }
 
 export function NoteBrowser({ selectedFolderId }: NoteBrowserProps) {
-  const listNotesQuery = useQuery(listNotesQueryOptions({ folderId: selectedFolderId }))
+  const listNotesQuery = useQuery(queries.notes.list({ folderId: selectedFolderId }))
 
   if (listNotesQuery.isLoading) {
     return (
@@ -33,31 +33,27 @@ export function NoteBrowser({ selectedFolderId }: NoteBrowserProps) {
         </Text>
       ) : (
         notes.map((note) => (
-          <UnstyledButton 
-            key={note.id} 
-            component={Link} 
-            to="/" 
-            className={classes.noteItem}
-          >
+          <UnstyledButton key={note.id} component={Link} to="/" className={classes.noteItem}>
             <Text size="sm" lineClamp={2} fw={500}>
               {note.title || "Untitled Note"}
             </Text>
             <Text size="xs" c="dimmed" lineClamp={1} mt={2}>
-              {note.content ? 
-                (() => {
-                  try {
-                    const blocks = JSON.parse(note.content)
-                    return blocks
-                      .map((block: any) => block.content?.map((item: any) => item.text).join("") || "")
-                      .filter(Boolean)
-                      .join(" ")
-                      .slice(0, 50) + "..."
-                  } catch {
-                    return note.content.slice(0, 50) + "..."
-                  }
-                })()
-                : "No content"
-              }
+              {note.content
+                ? (() => {
+                    try {
+                      const blocks = JSON.parse(note.content)
+                      return (
+                        blocks
+                          .map((block: any) => block.content?.map((item: any) => item.text).join("") || "")
+                          .filter(Boolean)
+                          .join(" ")
+                          .slice(0, 50) + "..."
+                      )
+                    } catch {
+                      return note.content.slice(0, 50) + "..."
+                    }
+                  })()
+                : "No content"}
             </Text>
           </UnstyledButton>
         ))

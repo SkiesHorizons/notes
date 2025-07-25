@@ -1,17 +1,16 @@
 import { noteMapper } from "@/lib/mappers/notes"
 import type { Note, NoteCreate, NotePatch } from "@/lib/models/notes"
 import { getCurrentUser, supabase } from "@/lib/supabase"
-import { mutationOptions, queryOptions, type DefaultError } from "@tanstack/react-query"
+import { createQueryKeys } from "@lukemorales/query-key-factory"
+import { mutationOptions, type DefaultError } from "@tanstack/react-query"
 
 export interface ListNotesParams {
   folderId?: string | null
 }
 
-export const listNotesQueryKey = (params?: ListNotesParams) => ["notes", "list", params]
-
-export const listNotesQueryOptions = (params?: ListNotesParams) =>
-  queryOptions<Note[]>({
-    queryKey: listNotesQueryKey(params),
+export const notes = createQueryKeys("notes", {
+  list: (params?: ListNotesParams) => ({
+    queryKey: [{ params }],
     queryFn: async () => {
       const user = await getCurrentUser()
       let query = supabase
@@ -35,58 +34,78 @@ export const listNotesQueryOptions = (params?: ListNotesParams) =>
 
       return noteMapper.toModels(data)
     },
-  })
-
-export const createNoteMutationOptions = () =>
-  mutationOptions<Note, DefaultError, NoteCreate>({
-    mutationFn: async (data) => {
+  }),
+  detail: (noteId: string) => ({
+    queryKey: [noteId],
+    queryFn: async () => {
       const user = await getCurrentUser()
-      const { data: created, error } = await supabase
+      const { data, error } = await supabase
         .from("notes")
-        .insert(noteMapper.toDbInsert(data, user.id))
         .select()
+        .eq("id", noteId)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
         .single()
 
       if (error) {
         throw error
       }
 
-      return noteMapper.toModel(created)
+      return noteMapper.toModel(data)
     },
-  })
+  }),
+})
 
-export const patchNoteMutationOptions = () =>
-  mutationOptions<Note, DefaultError, { noteId: string; data: NotePatch }>({
-    mutationFn: async ({ noteId, data }) => {
-      const user = await getCurrentUser()
-      const { data: updated, error } = await supabase
-        .from("notes")
-        .update(noteMapper.toDbUpdate(data))
-        .eq("id", noteId)
-        .eq("user_id", user.id)
-        .select()
-        .single()
+export const noteMutations = {
+  create: () =>
+    mutationOptions<Note, DefaultError, NoteCreate>({
+      mutationFn: async (data) => {
+        const user = await getCurrentUser()
+        const { data: created, error } = await supabase
+          .from("notes")
+          .insert(noteMapper.toDbInsert(data, user.id))
+          .select()
+          .single()
 
-      if (error) {
-        throw error
-      }
+        if (error) {
+          throw error
+        }
 
-      return noteMapper.toModel(updated)
-    },
-  })
+        return noteMapper.toModel(created)
+      },
+    }),
+  patch: () =>
+    mutationOptions<Note, DefaultError, { noteId: string; data: NotePatch }>({
+      mutationFn: async ({ noteId, data }) => {
+        const user = await getCurrentUser()
+        const { data: updated, error } = await supabase
+          .from("notes")
+          .update(noteMapper.toDbUpdate(data))
+          .eq("id", noteId)
+          .eq("user_id", user.id)
+          .select()
+          .single()
 
-export const deleteNoteMutationOptions = () =>
-  mutationOptions<void, DefaultError, { noteId: string }>({
-    mutationFn: async ({ noteId }) => {
-      const user = await getCurrentUser()
-      const { error } = await supabase
-        .from("notes")
-        .update({ deleted_at: new Date().toISOString() })
-        .eq("id", noteId)
-        .eq("user_id", user.id)
+        if (error) {
+          throw error
+        }
 
-      if (error) {
-        throw error
-      }
-    },
-  })
+        return noteMapper.toModel(updated)
+      },
+    }),
+  delete: () =>
+    mutationOptions<void, DefaultError, { noteId: string }>({
+      mutationFn: async ({ noteId }) => {
+        const user = await getCurrentUser()
+        const { error } = await supabase
+          .from("notes")
+          .update({ deleted_at: new Date().toISOString() })
+          .eq("id", noteId)
+          .eq("user_id", user.id)
+
+        if (error) {
+          throw error
+        }
+      },
+    }),
+}

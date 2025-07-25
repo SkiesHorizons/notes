@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/app-layout"
 import { NoteEditorModal, type NoteData } from "@/components/note-editor-modal"
-import { createNoteMutationOptions, patchNoteMutationOptions } from "@/lib/queries"
+import { mutations } from "@/lib/queries"
 import { noteEditorModalState } from "@/lib/stores"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -45,7 +45,7 @@ function NoteAddEditModal() {
 
   const queryClient = useQueryClient()
   const createNoteMutation = useMutation({
-    ...createNoteMutationOptions(),
+    ...mutations.notes.create(),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] })
       queryClient.invalidateQueries({ queryKey: ["folders"] })
@@ -60,7 +60,7 @@ function NoteAddEditModal() {
     },
   })
   const patchNoteMutation = useMutation({
-    ...patchNoteMutationOptions(),
+    ...mutations.notes.patch(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] })
       queryClient.invalidateQueries({ queryKey: ["folders"] })
@@ -102,7 +102,6 @@ function NoteAddEditModal() {
 
   useEffect(() => {
     console.log("note changed", selectedNote?.id)
-
   }, [selectedNote?.id])
 
   return (

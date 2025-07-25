@@ -1,9 +1,9 @@
 import type { Note, NoteCreate, NotePatch } from "@/lib/models/notes"
-import type { Database } from "@/lib/supabase"
+import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabase"
 
-type NoteRow = Database["public"]["Tables"]["notes"]["Row"]
-type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"]
-type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"]
+type NoteRow = Tables<"notes">
+type NoteInsert = TablesInsert<"notes">
+type NoteUpdate = TablesUpdate<"notes">
 
 export const noteMapper = {
   toModel: (db: NoteRow): Note => ({

@@ -2,7 +2,7 @@ import { CreateFolderModal } from "@/components/create-folder-modal"
 import { NoteList } from "@/components/note-list"
 import { WelcomeMessage } from "@/components/welcome-message"
 import type { Note } from "@/lib/models/notes"
-import { listNotesQueryOptions } from "@/lib/queries"
+import { queries } from "@/lib/queries"
 import { noteEditorModalState } from "@/lib/stores"
 import { Group, Skeleton, Stack, Title } from "@mantine/core"
 import { useQuery } from "@tanstack/react-query"
@@ -12,13 +12,13 @@ import { useState } from "react"
 export const Route = createFileRoute("/(app)/")({
   component: RouteComponent,
   loader: async ({ context: { queryClient } }) => {
-    queryClient.prefetchQuery(listNotesQueryOptions())
+    queryClient.prefetchQuery(queries.notes.list())
   },
 })
 
 function RouteComponent() {
   const [folderModalOpened, setFolderModalOpened] = useState(false)
-  const recentNotesQuery = useQuery(listNotesQueryOptions())
+  const recentNotesQuery = useQuery(queries.notes.list())
 
   const handleCreateNote = () => {
     noteEditorModalState.openCreate()

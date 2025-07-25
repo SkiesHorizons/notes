@@ -1,3 +1,9 @@
+export interface FolderPath {
+  id: string
+  name: string
+  depth: number
+}
+
 export interface NoteFolder {
   id: string
   userId: string
@@ -6,6 +12,8 @@ export interface NoteFolder {
   depth: number
   createdAt: string
   updatedAt: string
+  noteCount?: number
+  path?: FolderPath[]
 }
 
 export interface NoteFolderPatch {

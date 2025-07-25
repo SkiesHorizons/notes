@@ -2,20 +2,13 @@ import { CreateFolderModal } from "@/components/create-folder-modal"
 import { FolderBreadcrumbs } from "@/components/folder-breadcrumbs"
 import { FolderList } from "@/components/folder-list"
 import { NoteList } from "@/components/note-list"
-import type { NoteFolderTree } from "@/lib/models/note-folder"
+import type { NoteFolder } from "@/lib/models/note-folder"
 import type { Note } from "@/lib/models/notes"
-import {
-  createNoteMutationOptions,
-  getChildFoldersQueryOptions,
-  getCurrentFolderQueryOptions,
-  getFolderBreadcrumbQueryOptions,
-  listNotesQueryOptions,
-  patchNoteMutationOptions,
-} from "@/lib/queries"
+import { queries } from "@/lib/queries"
 import { noteEditorModalState } from "@/lib/stores"
 import { ActionIcon, Box, Group, Skeleton, Stack, Title } from "@mantine/core"
 import { IconChevronLeft } from "@tabler/icons-react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import z from "zod"
@@ -25,24 +18,20 @@ export const Route = createFileRoute("/(app)/browse")({
   validateSearch: z.object({
     folderId: z.string().optional(),
   }),
+  loader: async ({ context: { queryClient } }) => {
+    queryClient.prefetchQuery(queries.folders.list({ parentId: null }))
+  },
 })
 
 function RouteComponent() {
   const navigate = useNavigate()
   const { folderId } = Route.useSearch()
-  const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined)
-  const [modalOpened, setModalOpened] = useState(false)
   const [folderModalOpened, setFolderModalOpened] = useState(false)
 
   // Use the new specific queries instead of fetching all folders
-  const currentFolderQuery = useQuery(getCurrentFolderQueryOptions(folderId))
-  const childFoldersQuery = useQuery(getChildFoldersQueryOptions(folderId))
-  const breadcrumbQuery = useQuery(getFolderBreadcrumbQueryOptions(folderId))
-  const listNotesQuery = useQuery(listNotesQueryOptions({ folderId }))
-
-  const createNoteMutation = useMutation(createNoteMutationOptions())
-  const patchNoteMutation = useMutation(patchNoteMutationOptions())
-  const queryClient = useQueryClient()
+  const currentFolderQuery = useQuery(queries.folders.detail(folderId, { path: true }))
+  const childFoldersQuery = useQuery(queries.folders.list({ parentId: folderId }))
+  const listNotesQuery = useQuery(queries.notes.list({ folderId }))
 
   const handleFolderClick = (newFolderId: string) => {
     navigate({
@@ -73,25 +62,16 @@ function RouteComponent() {
   window.addEventListener("create-folder", handleCreateFolderEvent as EventListener)
 
   // Get current folder and its path for breadcrumbs
-  const getCurrentFolder = (): NoteFolderTree | null => {
-    return currentFolderQuery.data || null
-  }
-
-  const getBreadcrumbPath = (): NoteFolderTree[] => {
-    return breadcrumbQuery.data || []
+  const getCurrentFolder = (): NoteFolder | null => {
+    return currentFolderQuery?.data || null
   }
 
   // Get folders to display (children of current folder or root folders)
-  const getFoldersToDisplay = (): NoteFolderTree[] => {
+  const getFoldersToDisplay = (): NoteFolder[] => {
     return childFoldersQuery.data || []
   }
 
-  if (
-    currentFolderQuery.isLoading ||
-    childFoldersQuery.isLoading ||
-    breadcrumbQuery.isLoading ||
-    listNotesQuery.isLoading
-  ) {
+  if (currentFolderQuery?.isLoading || childFoldersQuery.isLoading || listNotesQuery.isLoading) {
     return (
       <Stack gap="md">
         <Group justify="space-between">
@@ -111,7 +91,6 @@ function RouteComponent() {
   const notes = listNotesQuery.data || []
   const foldersToDisplay = getFoldersToDisplay()
   const currentFolder = getCurrentFolder()
-  const breadcrumbPath = getBreadcrumbPath()
 
   return (
     <>
@@ -128,7 +107,7 @@ function RouteComponent() {
             </Group>
 
             {/* Use the new FolderBreadcrumbs component */}
-            <FolderBreadcrumbs breadcrumbs={breadcrumbPath} />
+            <FolderBreadcrumbs folder={currentFolder} />
           </Box>
         </Group>
 

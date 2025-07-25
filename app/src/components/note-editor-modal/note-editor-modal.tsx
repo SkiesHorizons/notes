@@ -2,8 +2,9 @@ import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 
 import { schema } from "@/lib/blocknotejs"
+import type { NoteFolder } from "@/lib/models"
 import type { Note } from "@/lib/models/notes"
-import { listFoldersQueryOptions } from "@/lib/queries"
+import { queries } from "@/lib/queries"
 import { BlockNoteView } from "@blocknote/mantine"
 import {
   BlockNoteViewEditor,
@@ -11,8 +12,8 @@ import {
   FormattingToolbarController,
   useCreateBlockNote,
 } from "@blocknote/react"
-import { Box, Group, Modal, Select, type ModalProps } from "@mantine/core"
-import { getHotkeyHandler, useDebouncedCallback, useHotkeys, useMediaQuery, type HotkeyItem } from "@mantine/hooks"
+import { Box, Group, Modal, type ModalProps, Select } from "@mantine/core"
+import { getHotkeyHandler, type HotkeyItem, useDebouncedCallback, useHotkeys, useMediaQuery } from "@mantine/hooks"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import classes from "./note-editor-modal.module.css"
@@ -44,17 +45,16 @@ export function NoteEditorModal({
 }: NoteEditorModalProps) {
   const titleRef = useRef<HTMLDivElement>(null)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(note?.folderId || initialFolderId || null)
-  const { data: folders = [] } = useQuery(listFoldersQueryOptions())
+  const { data: folders = [] } = useQuery(queries.folders.list())
 
   // Flatten folder tree for Select component
-  const flattenFolders = (folders: any[], prefix = ""): Array<{ value: string; label: string }> => {
+  const flattenFolders = (folders: NoteFolder[]): Array<{ value: string; label: string }> => {
     const result: Array<{ value: string; label: string }> = []
     folders.forEach((folder) => {
-      const label = prefix + folder.name
-      result.push({ value: folder.id, label })
-      if (folder.children && folder.children.length > 0) {
-        result.push(...flattenFolders(folder.children, label + " / "))
-      }
+      result.push({
+        value: folder.id,
+        label: folder.name,
+      })
     })
     return result
   }

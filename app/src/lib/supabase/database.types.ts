@@ -18,9 +18,9 @@ export type Database = {
       graphql: {
         Args: {
           operationName?: string
+          extensions?: Json
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
       }
@@ -121,7 +121,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_folder_with_path: {
+        Args: { folder_id: string }
+        Returns: {
+          name: string
+          parent_id: string
+          path: Json
+          deleted_at: string
+          updated_at: string
+          created_at: string
+          depth: number
+          id: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

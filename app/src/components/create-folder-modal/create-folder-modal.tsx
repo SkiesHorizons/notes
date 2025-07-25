@@ -1,4 +1,4 @@
-import { createFolderMutationOptions } from "@/lib/queries"
+import { mutations } from "@/lib/queries"
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
@@ -11,7 +11,7 @@ interface CreateFolderModalProps {
 
 export function CreateFolderModal({ opened, onClose, parentFolderId }: CreateFolderModalProps) {
   const [name, setName] = useState("")
-  const createFolderMutation = useMutation(createFolderMutationOptions())
+  const createFolderMutation = useMutation(mutations.folders.create())
   const queryClient = useQueryClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,10 +23,10 @@ export function CreateFolderModal({ opened, onClose, parentFolderId }: CreateFol
         name: name.trim(),
         parentId: parentFolderId,
       })
-      
+
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["folders"] })
-      
+
       // Reset form and close modal
       setName("")
       onClose()
@@ -41,12 +41,7 @@ export function CreateFolderModal({ opened, onClose, parentFolderId }: CreateFol
   }
 
   return (
-    <Modal
-      opened={opened}
-      onClose={handleClose}
-      title="Create New Folder"
-      size="sm"
-    >
+    <Modal opened={opened} onClose={handleClose} title="Create New Folder" size="sm">
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <TextInput
@@ -58,20 +53,12 @@ export function CreateFolderModal({ opened, onClose, parentFolderId }: CreateFol
             autoFocus
             data-autofocus
           />
-          
+
           <Group justify="flex-end">
-            <Button 
-              variant="subtle" 
-              onClick={handleClose} 
-              disabled={createFolderMutation.isPending}
-            >
+            <Button variant="subtle" onClick={handleClose} disabled={createFolderMutation.isPending}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              loading={createFolderMutation.isPending}
-              disabled={!name.trim()}
-            >
+            <Button type="submit" loading={createFolderMutation.isPending} disabled={!name.trim()}>
               Create Folder
             </Button>
           </Group>
