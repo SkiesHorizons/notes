@@ -25,8 +25,3 @@ export interface NoteFolderCreate {
   name: string
   parentId?: string | null
 }
-
-export interface NoteFolderTree extends NoteFolder {
-  children: NoteFolderTree[]
-  noteCount: number
-}

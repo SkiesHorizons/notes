@@ -1,10 +1,4 @@
-import type {
-  FolderPath,
-  NoteFolder,
-  NoteFolderCreate,
-  NoteFolderPatch,
-  NoteFolderTree,
-} from "@/lib/models/note-folder"
+import type { FolderPath, NoteFolder, NoteFolderCreate, NoteFolderPatch } from "@/lib/models/note-folder"
 import type { Json, Tables, TablesInsert, TablesUpdate } from "@/lib/supabase"
 
 type NoteFolderRow = Tables<"note_folders"> & { notes?: { count: number }[]; path?: Json }
@@ -34,38 +28,4 @@ export const noteFolderMapper = {
     parent_id: patch.parentId,
     updated_at: new Date().toISOString(),
   }),
-  buildTree: (folders: NoteFolder[], notesByFolder: Record<string, number> = {}): NoteFolderTree[] => {
-    const folderMap = new Map<string, NoteFolderTree>()
-    const rootFolders: NoteFolderTree[] = []
-
-    // Create tree nodes
-    folders.forEach((folder) => {
-      const treeNode: NoteFolderTree = {
-        ...folder,
-        children: [],
-        noteCount: notesByFolder[folder.id] || 0,
-      }
-      folderMap.set(folder.id, treeNode)
-    })
-
-    // Build tree structure
-    folders.forEach((folder) => {
-      const treeNode = folderMap.get(folder.id)!
-      if (folder.parentId && folderMap.has(folder.parentId)) {
-        const parent = folderMap.get(folder.parentId)!
-        parent.children.push(treeNode)
-      } else {
-        rootFolders.push(treeNode)
-      }
-    })
-
-    // Sort by name
-    const sortTree = (nodes: NoteFolderTree[]) => {
-      nodes.sort((a, b) => a.name.localeCompare(b.name))
-      nodes.forEach((node) => sortTree(node.children))
-    }
-    sortTree(rootFolders)
-
-    return rootFolders
-  },
 }
