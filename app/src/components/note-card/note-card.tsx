@@ -2,13 +2,14 @@ import { NoteContent } from "@/components/note-card/note-content"
 import type { Note } from "@/lib/models/notes"
 import { ActionIcon, Box, Breadcrumbs, Card, type CardProps, Menu, Text, Title } from "@mantine/core"
 import { IconDots, IconEdit, IconTrash } from "@tabler/icons-react"
+import type { PartialBlock } from "@blocknote/core"
 import dayjs from "dayjs"
 import { useState } from "react"
 import classes from "./note-card.module.css"
 
 interface NoteCardProps extends CardProps {
   note: Note
-  renderContent: (blocks: any) => Promise<string>
+  renderContent: (blocks: PartialBlock[]) => Promise<string>
   onEdit: (note: Note) => void
   onDelete?: (noteId: string) => void
   showFolderBreadcrumbs?: boolean

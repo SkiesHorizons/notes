@@ -113,7 +113,7 @@ function RouteComponent() {
 
         <Stack gap="lg">
           {/* Display folders first */}
-          <FolderList folders={foldersToDisplay} onFolderClick={handleFolderClick} />
+          <FolderList folders={foldersToDisplay} onFolderClick={handleFolderClick} onCreateFolder={handleCreateFolderEvent} />
 
           {/* Display notes */}
           <NoteList notes={notes} onEditNote={handleEditNote} onCreateNote={handleCreateNote} />

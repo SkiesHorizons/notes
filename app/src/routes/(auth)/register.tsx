@@ -29,14 +29,14 @@ function RouteComponent() {
       })
       await navigate({ to: "/login", replace: true })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       notifications.show({
         color: "red",
         title: "Registration failed",
         message: error?.message || "An error occurred during registration.",
         autoClose: 5000,
       })
-      console.error(error)
+      console.error("Registration error:", error)
     },
   })
 

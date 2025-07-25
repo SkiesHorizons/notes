@@ -3,6 +3,7 @@ import { loginMutationOptions } from "@/lib/queries"
 import { notifications } from "@mantine/notifications"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router"
+import type { AuthTokenResponsePassword } from "@supabase/supabase-js"
 import { z } from "zod"
 
 export const authenticatedFallback = "/" as const
@@ -25,7 +26,7 @@ function RouteComponent() {
   const navigate = Route.useNavigate()
   const loginMutation = useMutation({
     ...loginMutationOptions(),
-    onSuccess: async (res: any) => {
+    onSuccess: async (res: AuthTokenResponsePassword) => {
       if (res.error) {
         notifications.show({
           color: "red",
@@ -49,7 +50,7 @@ function RouteComponent() {
 
       await navigate({ to: search.redirect || authenticatedFallback, replace: true })
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       notifications.show({
         color: "red",
         title: "Login failed",

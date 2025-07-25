@@ -1,5 +1,6 @@
 import { mutations } from "@/lib/queries"
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core"
+import { notifications } from "@mantine/notifications"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
@@ -31,7 +32,12 @@ export function CreateFolderModal({ opened, onClose, parentFolderId }: CreateFol
       setName("")
       onClose()
     } catch (error) {
-      console.error("Error creating folder:", error)
+      notifications.show({
+        color: "red",
+        title: "Error creating folder",
+        message: error instanceof Error ? error.message : "An unexpected error occurred",
+        autoClose: 5000,
+      })
     }
   }
 

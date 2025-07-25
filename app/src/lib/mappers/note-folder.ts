@@ -5,6 +5,17 @@ type NoteFolderRow = Tables<"note_folders"> & { notes?: { count: number }[]; pat
 type NoteFolderInsert = TablesInsert<"note_folders">
 type NoteFolderUpdate = TablesUpdate<"note_folders">
 
+function isValidFolderPath(path: Json): path is FolderPath[] {
+  return Array.isArray(path) && path.every(
+    (item): item is FolderPath => 
+      typeof item === "object" && 
+      item !== null && 
+      "id" in item && typeof item.id === "string" && 
+      "name" in item && typeof item.name === "string" && 
+      "depth" in item && typeof item.depth === "number"
+  )
+}
+
 export const noteFolderMapper = {
   toModel: (db: NoteFolderRow): NoteFolder => ({
     id: db.id,
@@ -13,7 +24,7 @@ export const noteFolderMapper = {
     parentId: db.parent_id,
     depth: db.depth,
     noteCount: db.notes?.[0]?.count,
-    path: db.path ? (db.path as unknown as FolderPath[]) : undefined,
+    path: db.path && isValidFolderPath(db.path) ? db.path : undefined,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   }),
