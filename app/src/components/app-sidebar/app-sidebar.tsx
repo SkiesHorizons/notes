@@ -5,16 +5,13 @@ import { IconFolders, IconHome, IconMoon, IconSettings, IconSun } from "@tabler/
 import { Link, useLocation } from "@tanstack/react-router"
 import classes from "./app-sidebar.module.css"
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  close?: () => void
+}
+
+export function AppSidebar({close}: AppSidebarProps) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const location = useLocation()
-
-  const isActive = (path: string) => {
-    if (path === "/" && location.pathname === "/") {
-      return true
-    }
-    return path === "/browse" && location.pathname === "/browse"
-  }
 
   const handleCreateNote = () => {
     noteEditModal.openCreate(location.search.folderId)
@@ -30,14 +27,14 @@ export function AppSidebar() {
       <CreateNoteButton onCreateNote={handleCreateNote} onCreateFolder={handleCreateFolder} variant="button" />
 
       <Stack gap="xs">
-        <Link to="/" className={classes.navLink} data-active={isActive("/")}>
+        <Link to="/" className={classes.navLink} onClick={close}>
           <Group gap="sm">
             <IconHome size={20} />
             <span>Home</span>
           </Group>
         </Link>
 
-        <Link to="/browse" className={classes.navLink} data-active={isActive("/browse")}>
+        <Link to="/browse" className={classes.navLink} onClick={close}>
           <Group gap="sm">
             <IconFolders size={20} />
             <span>Browse</span>

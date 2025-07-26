@@ -9,7 +9,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [opened, { toggle }] = useDisclosure()
+  const [opened, { toggle, close }] = useDisclosure()
 
   return (
     <AppShell
@@ -21,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <AppHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
       <AppShell.Navbar>
-        <AppSidebar />
+        <AppSidebar close={close} />
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>

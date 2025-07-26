@@ -19,14 +19,14 @@
   border-color: var(--mantine-color-dark-4);
 }
 
-.navLink[data-active="true"] {
+.navLink[data-status="active"] {
   background-color: var(--mantine-color-blue-1);
   color: var(--mantine-color-blue-7);
   border-color: var(--mantine-color-blue-3);
   font-weight: 600;
 }
 
-[data-mantine-color-scheme="dark"] .navLink[data-active="true"] {
+[data-mantine-color-scheme="dark"] .navLink[data-status="active"] {
   background-color: var(--mantine-color-blue-9);
   color: var(--mantine-color-blue-3);
   border-color: var(--mantine-color-blue-6);
