@@ -3,7 +3,7 @@ import { IconFolderPlus } from "@tabler/icons-react"
 import classes from "./folder-placeholder.module.css"
 
 interface FolderPlaceholderProps {
-  onClick: () => void
+  onClick?: () => void
 }
 
 export function FolderPlaceholder({ onClick }: FolderPlaceholderProps) {

@@ -1,16 +1,14 @@
-import { CreateFolderModal } from "@/components/create-folder-modal"
 import { FolderBreadcrumbs } from "@/components/folder-breadcrumbs"
 import { FolderList } from "@/components/folder-list"
 import { NoteList } from "@/components/note-list"
 import type { NoteFolder } from "@/lib/models/note-folder"
 import type { Note } from "@/lib/models/notes"
 import { queries } from "@/lib/queries"
-import { noteEditorModal } from "@/lib/stores"
+import { folderEditModal, noteEditorModal } from "@/lib/stores"
 import { ActionIcon, Box, Group, Skeleton, Stack, Title } from "@mantine/core"
 import { IconChevronLeft } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute } from "@tanstack/react-router"
 import z from "zod"
 
 export const Route = createFileRoute("/(app)/browse")({
@@ -24,9 +22,8 @@ export const Route = createFileRoute("/(app)/browse")({
 })
 
 function RouteComponent() {
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
   const { folderId = null } = Route.useSearch()
-  const [folderModalOpened, setFolderModalOpened] = useState(false)
 
   // Use the new specific queries instead of fetching all folders
   const currentFolderQuery = useQuery(queries.folders.detail(folderId || undefined, { path: true }))
@@ -43,6 +40,9 @@ function RouteComponent() {
   const handleBackClick = () => {
     navigate({
       to: "/browse",
+      search: {
+        folderId: currentFolder?.parentId || undefined,
+      },
     })
   }
 
@@ -55,11 +55,9 @@ function RouteComponent() {
   }
 
   // Listen for create folder events from sidebar
-  const handleCreateFolderEvent = () => {
-    setFolderModalOpened(true)
+  const handleCreateFolder = () => {
+    folderEditModal.openCreate(folderId || undefined)
   }
-
-  window.addEventListener("create-folder", handleCreateFolderEvent as EventListener)
 
   // Get current folder and its path for breadcrumbs
   const getCurrentFolder = (): NoteFolder | null => {
@@ -113,18 +111,16 @@ function RouteComponent() {
 
         <Stack gap="lg">
           {/* Display folders first */}
-          <FolderList folders={foldersToDisplay} onFolderClick={handleFolderClick} />
+          <FolderList
+            folders={foldersToDisplay}
+            onFolderClick={handleFolderClick}
+            onCreateFolder={handleCreateFolder}
+          />
 
           {/* Display notes */}
           <NoteList notes={notes} onEditNote={handleEditNote} onCreateNote={handleCreateNote} />
         </Stack>
       </Stack>
-
-      <CreateFolderModal
-        opened={folderModalOpened}
-        onClose={() => setFolderModalOpened(false)}
-        parentFolderId={folderId}
-      />
     </>
   )
 }

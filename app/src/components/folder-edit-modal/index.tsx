@@ -1,2 +1,1 @@
-export * from "./note-editor-modal"
 export * from "./folder-edit-modal"

@@ -1,5 +1,5 @@
 import { CreateNoteButton } from "@/components/create-note-button"
-import { noteEditorModal } from "@/lib/stores"
+import { folderEditModal, noteEditorModal } from "@/lib/stores"
 import { ActionIcon, Group, Stack, useMantineColorScheme } from "@mantine/core"
 import { IconFolders, IconHome, IconMoon, IconSettings, IconSun } from "@tabler/icons-react"
 import { Link, useLocation } from "@tanstack/react-router"
@@ -16,12 +16,11 @@ export function AppSidebar() {
   }
 
   const handleCreateNote = () => {
-    noteEditorModal.openCreate()
+    noteEditorModal.openCreate(location.search.folderId)
   }
 
   const handleCreateFolder = () => {
-    // Dispatch custom event for creating a folder
-    window.dispatchEvent(new CustomEvent("create-folder"))
+    folderEditModal.openCreate(location.search.folderId)
   }
 
   return (

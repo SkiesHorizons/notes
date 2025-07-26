@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/app-layout"
 import { NoteEditorModal } from "@/components/note-editor-modal"
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { FolderEditModal } from "@/components/folder-edit-modal"
 
 export const Route = createFileRoute("/(app)")({
   beforeLoad: async ({
@@ -26,6 +27,7 @@ function RouteComponent() {
     <AppLayout>
       <Outlet />
       <NoteEditorModal />
+      <FolderEditModal />
     </AppLayout>
   )
 }

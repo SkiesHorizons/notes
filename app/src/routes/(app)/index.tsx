@@ -1,4 +1,3 @@
-import { CreateFolderModal } from "@/components/create-folder-modal"
 import { NoteList } from "@/components/note-list"
 import { WelcomeMessage } from "@/components/welcome-message"
 import type { Note } from "@/lib/models/notes"
@@ -8,7 +7,6 @@ import { Group, Skeleton, Stack, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
 
 export const Route = createFileRoute("/(app)/")({
   component: RouteComponent,
@@ -18,7 +16,6 @@ export const Route = createFileRoute("/(app)/")({
 })
 
 function RouteComponent() {
-  const [folderModalOpened, setFolderModalOpened] = useState(false)
   const recentNotesQuery = useQuery(queries.notes.list())
 
   const handleCreateNote = () => {
@@ -82,8 +79,6 @@ function RouteComponent() {
           onDeleteNote={handleDeleteNote}
         />
       </Stack>
-
-      <CreateFolderModal opened={folderModalOpened} onClose={() => setFolderModalOpened(false)} parentFolderId={null} />
     </>
   )
 }
