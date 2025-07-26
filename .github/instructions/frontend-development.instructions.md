@@ -12,6 +12,8 @@ app/
 ├── src/                # Frontend source code
 │   ├── components/     # Reusable UI components
 │   ├── routes/         # TanStack routes and pages
+│   │   ├── (app)/      # Main application routes with authenticated
+│   │   ├── (auth)/     # Authentication routes (login, signup, etc.)
 │   ├── lib/            # Business logic and utilities
 │   │   ├── supabase/   # Supabase client and utilities
 │   │   ├── models/     # TypeScript models and interfaces
