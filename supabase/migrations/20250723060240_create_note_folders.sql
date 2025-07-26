@@ -80,7 +80,11 @@ create policy "Authenticated users can delete their own folders"
 
 -- create function to automatically calculate folder depth
 create or replace function calculate_folder_depth()
-    returns trigger as
+    returns trigger
+    language plpgsql
+    security invoker
+    set search_path = ''
+as
 $$
 begin
     -- if no parent, depth is 0 (root folder)
@@ -102,7 +106,7 @@ begin
 
     return new;
 end;
-$$ language plpgsql;
+$$;
 
 -- create trigger to automatically set folder depth on insert/update
 create trigger trigger_calculate_folder_depth
@@ -113,7 +117,11 @@ execute function calculate_folder_depth();
 
 -- create function to prevent circular references in folder hierarchy
 create or replace function prevent_circular_folder_reference()
-    returns trigger as
+    returns trigger
+    language plpgsql
+    security invoker
+    set search_path = ''
+as
 $$
 begin
     -- check if the new parent_id would create a circular reference
@@ -152,7 +160,7 @@ exception
         -- no circular reference found, proceed normally
         return new;
 end;
-$$ language plpgsql;
+$$;
 
 -- create trigger to prevent circular references
 create trigger trigger_prevent_circular_folder_reference
