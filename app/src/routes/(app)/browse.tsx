@@ -3,13 +3,14 @@ import { FolderList } from "@/components/folder-list"
 import { NoteList } from "@/components/note-list"
 import type { NoteFolder } from "@/lib/models/note-folder"
 import type { Note } from "@/lib/models/notes"
-import { queries } from "@/lib/queries"
+import { mutations, queries } from "@/lib/queries"
 import { folderEditModal, noteEditModal } from "@/lib/stores"
 import { ActionIcon, Box, Group, Skeleton, Stack, Title } from "@mantine/core"
 import { IconChevronLeft } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import z from "zod"
+import { notifications } from "@mantine/notifications"
 
 export const Route = createFileRoute("/(app)/browse")({
   component: RouteComponent,
@@ -29,6 +30,28 @@ function RouteComponent() {
   const currentFolderQuery = useQuery(queries.folders.detail(folderId || undefined, { path: true }))
   const childFoldersQuery = useQuery(queries.folders.list({ parentId: folderId }))
   const listNotesQuery = useQuery(queries.notes.list({ folderId }))
+
+  const queryClient = useQueryClient()
+  const { mutate: deleteNote } = useMutation({
+    ...mutations.notes.delete(),
+    onSuccess: async (_, { noteId }) => {
+      notifications.show({
+        title: "Note deleted",
+        message: "The note has been successfully deleted.",
+        color: "green",
+      })
+      await queryClient.setQueryData(queries.notes.list({ folderId }).queryKey, (oldData: Note[]) => {
+        return oldData.filter((note) => note.id !== noteId)
+      })
+    },
+    onError: (error) => {
+      notifications.show({
+        title: "Error deleting note",
+        message: error.message || "An error occurred while deleting the note.",
+        color: "red",
+      })
+    },
+  })
 
   const handleFolderClick = (newFolderId: string) => {
     navigate({
@@ -52,6 +75,10 @@ function RouteComponent() {
 
   const handleEditNote = (note: Note) => {
     noteEditModal.openEdit(note)
+  }
+
+  const handleDeleteNote = (noteId: string) => {
+    deleteNote({ noteId })
   }
 
   // Listen for create folder events from sidebar
@@ -118,7 +145,12 @@ function RouteComponent() {
           />
 
           {/* Display notes */}
-          <NoteList notes={notes} onEditNote={handleEditNote} onCreateNote={handleCreateNote} />
+          <NoteList
+            notes={notes}
+            onEditNote={handleEditNote}
+            onCreateNote={handleCreateNote}
+            onDeleteNote={handleDeleteNote}
+          />
         </Stack>
       </Stack>
     </>
