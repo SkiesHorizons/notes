@@ -77,7 +77,7 @@ export function NoteEditModal() {
   const editor = useCreateBlockNote(
     {
       initialContent: initialNote?.content ? JSON.parse(initialNote.content) : undefined,
-      schema: schema,
+      schema,
       heading: {
         levels: [1, 2, 3, 4, 5, 6],
       },
@@ -141,6 +141,7 @@ export function NoteEditModal() {
     return () => {
       saveImmediately()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingNoteId])
 
   const saveHotkey: HotkeyItem = ["mod+S", saveImmediately]
@@ -151,6 +152,7 @@ export function NoteEditModal() {
     return () => {
       window.removeEventListener("beforeunload", saveImmediately)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const moveToContentEditor = () => {

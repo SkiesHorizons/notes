@@ -10,9 +10,10 @@ export function AppSidebar() {
   const location = useLocation()
 
   const isActive = (path: string) => {
-    if (path === "/" && location.pathname === "/") return true
-    if (path === "/browse" && location.pathname === "/browse") return true
-    return false
+    if (path === "/" && location.pathname === "/") {
+      return true
+    }
+    return path === "/browse" && location.pathname === "/browse"
   }
 
   const handleCreateNote = () => {
@@ -44,7 +45,7 @@ export function AppSidebar() {
         </Link>
       </Stack>
 
-      <div style={{ flex: 1 }}></div>
+      <div style={{ flex: 1 }} />
 
       <Stack gap="xs">
         <Group gap="xs" justify="space-between">

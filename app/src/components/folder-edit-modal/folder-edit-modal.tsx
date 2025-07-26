@@ -25,14 +25,13 @@ export function FolderEditModal() {
   useEffect(() => {
     const formValues = form.getValues()
     form.setInitialValues({
-      name: initialFolder ? initialFolder.name : formValues["name"],
+      name: initialFolder ? initialFolder.name : formValues.name,
       parentId: initialFolder ? initialFolder.parentId : initialParentFolderId || null,
     })
     form.reset()
-  }, [initialFolder, initialParentFolderId])
+  }, [form, initialFolder, initialParentFolderId])
 
   const folderOptions = useMemo(() => {
-    console.log("Generating folder options")
     return (
       folders?.map((folder) => ({
         value: folder.id,
@@ -42,7 +41,6 @@ export function FolderEditModal() {
   }, [folders])
 
   const handleSubmit = (values: Partial<z.infer<typeof zFolderFormValues>>) => {
-    console.log(values)
     folderEditModal.close()
     form.reset()
   }

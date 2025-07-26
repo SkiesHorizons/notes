@@ -36,7 +36,6 @@ function RouteComponent() {
         message: error?.message || "An error occurred during registration.",
         autoClose: 5000,
       })
-      console.error(error)
     },
   })
 

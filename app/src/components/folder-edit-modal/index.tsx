@@ -1,1 +1,1 @@
-export * from "./folder-edit-modal"
+export { FolderEditModal } from "./folder-edit-modal"
