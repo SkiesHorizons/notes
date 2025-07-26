@@ -46,6 +46,11 @@ export function FolderEditModal() {
   const { mutate: createFolder } = useMutation({
     ...mutations.folders.create(),
     onSuccess: async (created) => {
+      notifications.show({
+        color: "green",
+        title: "Folder created",
+        message: `Folder "${created.name}" has been successfully created.`,
+      })
       await queryClient.invalidateQueries({
         queryKey: queries.folders.list().queryKey,
       })
@@ -65,6 +70,11 @@ export function FolderEditModal() {
   const { mutate: patchFolder } = useMutation({
     ...mutations.folders.patch(),
     onSuccess: async (updated) => {
+      notifications.show({
+        color: "green",
+        title: "Folder updated",
+        message: `Folder "${updated.name}" has been successfully updated.`,
+      })
       await queryClient.setQueryData(queries.folders.list().queryKey, (old: any[]) =>
         old.map((folder) => (folder.id === updated.id ? updated : folder)),
       )

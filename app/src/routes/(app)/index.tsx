@@ -5,7 +5,7 @@ import { mutations, queries } from "@/lib/queries"
 import { noteEditModal } from "@/lib/stores"
 import { Group, Skeleton, Stack, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/(app)/")({
@@ -26,10 +26,18 @@ function RouteComponent() {
     noteEditModal.openEdit(note)
   }
 
+  const queryClient = useQueryClient()
   const { mutate: deleteNote } = useMutation({
     ...mutations.notes.delete(),
-    onSuccess: async () => {
-      await recentNotesQuery.refetch()
+    onSuccess: async (_, { noteId }) => {
+      notifications.show({
+        color: "green",
+        title: "Note deleted",
+        message: "The note has been successfully deleted.",
+      })
+      await queryClient.setQueryData(queries.notes.list().queryKey, (oldData: Note[]) => {
+        return oldData.filter((note) => note.id !== noteId)
+      })
     },
     onError: (error) => {
       notifications.show({
