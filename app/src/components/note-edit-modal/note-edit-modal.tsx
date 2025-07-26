@@ -14,14 +14,14 @@ import { Group, Modal, type ModalProps, ScrollArea, Select } from "@mantine/core
 import { getHotkeyHandler, type HotkeyItem, useDebouncedCallback, useHotkeys, useMediaQuery } from "@mantine/hooks"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
-import classes from "./note-editor-modal.module.css"
-import { noteEditorModal } from "@/lib/stores"
+import classes from "./note-edit-modal.module.css"
+import { noteEditModal } from "@/lib/stores"
 import { useStore } from "@tanstack/react-store"
 import { notifications } from "@mantine/notifications"
 import type { Note } from "@/lib/models"
 
-export function NoteEditorModal() {
-  const { opened, initialNote, initialFolderId, editingNoteId } = useStore(noteEditorModal.store)
+export function NoteEditModal() {
+  const { opened, initialNote, initialFolderId, editingNoteId } = useStore(noteEditModal.store)
   const titleRef = useRef<HTMLDivElement>(null)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(initialNote?.folderId || null)
   const folderSelectRef = useRef<HTMLInputElement>(null)
@@ -35,7 +35,7 @@ export function NoteEditorModal() {
   const { mutate: createNote } = useMutation({
     ...mutations.notes.create(),
     onSuccess: async (created) => {
-      noteEditorModal.updateEditingNoteId(created.id)
+      noteEditModal.updateEditingNoteId(created.id)
       await queryClient.invalidateQueries({
         queryKey: queries.notes.list().queryKey,
       })
@@ -52,7 +52,7 @@ export function NoteEditorModal() {
   const { mutate: patchNote } = useMutation({
     ...mutations.notes.patch(),
     onSuccess: async (updated) => {
-      noteEditorModal.updateEditingNoteId(updated.id)
+      noteEditModal.updateEditingNoteId(updated.id)
       await queryClient.setQueryData(queries.notes.list().queryKey, (old: Note[]) =>
         old.map((note) => (note.id === updated.id ? updated : note)),
       )
@@ -181,7 +181,7 @@ export function NoteEditorModal() {
 
   const handleClose = () => {
     saveImmediately()
-    noteEditorModal.close()
+    noteEditModal.close()
   }
 
   const handleTitleKeyDown = getHotkeyHandler([

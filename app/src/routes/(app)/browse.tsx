@@ -4,7 +4,7 @@ import { NoteList } from "@/components/note-list"
 import type { NoteFolder } from "@/lib/models/note-folder"
 import type { Note } from "@/lib/models/notes"
 import { queries } from "@/lib/queries"
-import { folderEditModal, noteEditorModal } from "@/lib/stores"
+import { folderEditModal, noteEditModal } from "@/lib/stores"
 import { ActionIcon, Box, Group, Skeleton, Stack, Title } from "@mantine/core"
 import { IconChevronLeft } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
@@ -47,11 +47,11 @@ function RouteComponent() {
   }
 
   const handleCreateNote = () => {
-    noteEditorModal.openCreate(folderId || undefined)
+    noteEditModal.openCreate(folderId || undefined)
   }
 
   const handleEditNote = (note: Note) => {
-    noteEditorModal.openEdit(note)
+    noteEditModal.openEdit(note)
   }
 
   // Listen for create folder events from sidebar

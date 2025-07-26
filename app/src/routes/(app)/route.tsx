@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/app-layout"
-import { NoteEditorModal } from "@/components/note-editor-modal"
+import { NoteEditModal } from "@/components/note-edit-modal"
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 import { FolderEditModal } from "@/components/folder-edit-modal"
 
@@ -26,7 +26,7 @@ function RouteComponent() {
   return (
     <AppLayout>
       <Outlet />
-      <NoteEditorModal />
+      <NoteEditModal />
       <FolderEditModal />
     </AppLayout>
   )

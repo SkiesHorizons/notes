@@ -2,7 +2,7 @@ import { NoteList } from "@/components/note-list"
 import { WelcomeMessage } from "@/components/welcome-message"
 import type { Note } from "@/lib/models/notes"
 import { mutations, queries } from "@/lib/queries"
-import { noteEditorModal } from "@/lib/stores"
+import { noteEditModal } from "@/lib/stores"
 import { Group, Skeleton, Stack, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -19,11 +19,11 @@ function RouteComponent() {
   const recentNotesQuery = useQuery(queries.notes.list())
 
   const handleCreateNote = () => {
-    noteEditorModal.openCreate()
+    noteEditModal.openCreate()
   }
 
   const handleEditNote = (note: Note) => {
-    noteEditorModal.openEdit(note)
+    noteEditModal.openEdit(note)
   }
 
   const { mutate: deleteNote } = useMutation({

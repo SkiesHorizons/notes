@@ -1,7 +1,7 @@
 import type { Note } from "@/lib/models"
 import { Store } from "@tanstack/react-store"
 
-export interface NoteEditorModalState {
+interface NoteEditModalState {
   opened: boolean
   saving?: boolean
   initialNote?: Note | null
@@ -9,11 +9,11 @@ export interface NoteEditorModalState {
   editingNoteId?: string
 }
 
-const store = new Store<NoteEditorModalState>({
+const store = new Store<NoteEditModalState>({
   opened: false,
 })
 
-export const noteEditorModal = {
+export const noteEditModal = {
   store,
   openEdit(note: Note) {
     store.setState({
