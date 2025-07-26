@@ -1,5 +1,6 @@
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
+import "./blocknote-styles.css"
 
 import { schema } from "@/lib/blocknote/schema.ts"
 import { mutations, queries } from "@/lib/queries"
@@ -8,9 +9,10 @@ import {
   BlockNoteViewEditor,
   ExperimentalMobileFormattingToolbarController,
   FormattingToolbarController,
+  SideMenuController,
   useCreateBlockNote,
 } from "@blocknote/react"
-import { Group, Modal, type ModalProps, ScrollArea, Select } from "@mantine/core"
+import { ActionIcon, Flex, Group, Modal, type ModalProps, ScrollArea, Select } from "@mantine/core"
 import { getHotkeyHandler, type HotkeyItem, useDebouncedCallback, useHotkeys, useMediaQuery } from "@mantine/hooks"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -19,6 +21,7 @@ import { noteEditModal } from "@/lib/stores"
 import { useStore } from "@tanstack/react-store"
 import { notifications } from "@mantine/notifications"
 import type { Note } from "@/lib/models"
+import { IconArrowLeft } from "@tabler/icons-react"
 
 export function NoteEditModal() {
   const { opened, initialNote, initialFolderId, editingNoteId } = useStore(noteEditModal.store)
@@ -213,34 +216,48 @@ export function NoteEditModal() {
         centered: true,
       }
 
+  const NoteTitle = () => (
+    <Modal.Title
+      ref={titleRef}
+      title="Note Title"
+      className={classes.editableTitle}
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={saveDebounced}
+      onInput={() => {
+        const titleText = titleRef.current?.textContent
+        if (titleText?.length === 0) {
+          titleRef.current!.textContent = null
+        }
+        saveDebounced()
+      }}
+      onKeyDown={handleTitleKeyDown}
+      data-placeholder="Untitled Note"
+      role="textbox"
+      style={{ flex: 1 }}
+    >
+      {initialNote?.title}
+    </Modal.Title>
+  )
+
   return (
     <Modal.Root opened={opened} onClose={handleClose} {...modalProps} classNames={classes}>
       <Modal.Overlay />
       <Modal.Content>
         <Modal.Header>
-          <Group w="100%" align="flex-start" gap="md">
-            <Modal.Title
-              ref={titleRef}
-              title="Note Title"
-              className={classes.editableTitle}
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={saveDebounced}
-              onInput={() => {
-                const titleText = titleRef.current?.textContent
-                if (titleText?.length === 0) {
-                  titleRef.current!.textContent = null
-                }
-                saveDebounced()
-              }}
-              onKeyDown={handleTitleKeyDown}
-              data-placeholder="Untitled Note"
-              role="textbox"
-              style={{ flex: 1 }}
-            >
-              {initialNote?.title}
-            </Modal.Title>
-          </Group>
+          <Flex w="100%" gap="md" direction={isMobile ? "column" : "row"}>
+            {isMobile && (
+              <ActionIcon
+                variant="subtle"
+                onClick={handleClose}
+                title="Close note editor"
+                aria-label="Close note editor"
+              >
+                <IconArrowLeft style={{ width: "70%", height: "70%" }} strokeWidth={1.5} />
+              </ActionIcon>
+            )}
+            <NoteTitle />
+          </Flex>
         </Modal.Header>
         <Modal.Body component={ScrollArea}>
           <BlockNoteView
@@ -250,8 +267,15 @@ export function NoteEditModal() {
             onContextMenu={(e) => e.preventDefault()}
             onKeyDown={handleContentEditorKeyDown}
             renderEditor={false}
+            sideMenu={false}
+            data-note-content
           >
-            {!isMobile && <FormattingToolbarController />}
+            {!isMobile && (
+              <>
+                <SideMenuController />
+                <FormattingToolbarController />
+              </>
+            )}
             {isMobile && <ExperimentalMobileFormattingToolbarController />}
             <BlockNoteViewEditor data-autofocus />
           </BlockNoteView>
@@ -267,10 +291,11 @@ export function NoteEditModal() {
               setSelectedFolderId(value)
               saveDebounced()
             }}
-            placeholder="Select folder"
+            placeholder={!folders.length ? "No folders available" : "Select folder"}
             clearable
             size="sm"
-            style={{ minWidth: 200 }}
+            miw={200}
+            disabled={!folders.length}
           />
         </Group>
       </Modal.Content>

@@ -1,2 +1,1 @@
-export * from "./note-edit-modal.tsx";
-
+export { NoteEditModal } from "./note-edit-modal"
